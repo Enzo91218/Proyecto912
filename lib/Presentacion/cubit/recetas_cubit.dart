@@ -23,6 +23,10 @@ class RecetasCubit extends Cubit<RecetasState> {
     emit(RecetasLoading());
     try {
       final recetas = casoUso.call(ingredientes);
+      if (recetas.isEmpty) {
+        emit(RecetasError('No se encontraron recetas para los ingredientes proporcionados'));
+        return;
+      }
       emit(RecetasLoaded(recetas));
     } catch (e) {
       emit(RecetasError(e.toString()));
