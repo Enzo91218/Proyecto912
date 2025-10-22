@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:math';
+
+import '../cubit/imc_cubit.dart';
 
 class PantallaIMC extends StatefulWidget {
   const PantallaIMC({super.key});
@@ -13,6 +16,15 @@ class _PantallaIMCState extends State<PantallaIMC> {
   final pesoCtrl = TextEditingController();
   final alturaCtrl = TextEditingController();
   String resultado = "";
+
+  @override
+  void initState() {
+    super.initState();
+    // cargar registros previos
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<IMCCubit>().cargar();
+    });
+  }
 
   void _calcularIMC() {
     final peso = double.tryParse(pesoCtrl.text);
@@ -46,7 +58,13 @@ class _PantallaIMCState extends State<PantallaIMC> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Calcular IMC")),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => context.go('/'),
+        ),
+        title: const Text("Calcular IMC"),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -79,10 +97,20 @@ class _PantallaIMCState extends State<PantallaIMC> {
               onPressed: _calcularIMC,
             ),
             const SizedBox(height: 20),
-            Text(
-              resultado,
-              style: const TextStyle(fontSize: 18),
-            ),
+            BlocBuilder<IMCCubit, IMCState>(builder: (context, state) {
+              if (state is IMCLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is IMCLoaded) {
+                return Column(
+                  children: state.registros
+                      .map((r) => Text('IMC: ${r.imc} - ${r.categoria}'))
+                      .toList(),
+                );
+              } else if (state is IMCError) {
+                return Text('Error: ${state.mensaje}');
+              }
+              return Text(resultado, style: const TextStyle(fontSize: 18));
+            }),
             const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,

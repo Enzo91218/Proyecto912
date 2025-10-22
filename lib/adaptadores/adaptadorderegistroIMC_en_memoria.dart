@@ -6,8 +6,10 @@ class RepositorioDeRegistroIMCA implements RepositorioDeRegistroIMC {
   List<ResultadoIMC> obtenerRegistrosIMC() {
     // aca empiezan los ejemplos
     return [
+      ResultadoIMC(imc: 16.8, categoria: 'Bajo peso'),
       ResultadoIMC(imc: 22.5, categoria: 'Normal'),
-      ResultadoIMC(imc: 28.1, categoria: 'Sobrepeso'),
+      ResultadoIMC(imc: 25.0, categoria: 'Sobrepeso'),
+      ResultadoIMC(imc: 31.2, categoria: 'Obesidad'),
     ];
   }
 }

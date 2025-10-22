@@ -1,8 +1,30 @@
 import '../../dominio/entidades/usuario.dart';
+import '../../dominio/repositorios/repositorio_de_usuario.dart';
 
 class RegistrarUsuario {
-  // Aquí deberías implementar la lógica de registro, por ahora es un stub
+  final RepositorioDeUsuario repositorio;
+  RegistrarUsuario(this.repositorio);
+
   void call(Usuario usuario) {
-    // Implementar registro de usuario
+    // Validaciones simples
+    if (usuario.nombre.isEmpty) {
+      throw ArgumentError('El nombre es obligatorio');
+    }
+    if (usuario.email.isEmpty || !usuario.email.contains('@')) {
+      throw ArgumentError('Email inválido');
+    }
+    if (usuario.password.isEmpty || usuario.password.length < 4) {
+      throw ArgumentError('La contraseña debe tener al menos 4 caracteres');
+    }
+
+    // email único
+    final existentes = repositorio.obtenerUsuarios();
+    final existeEmail = existentes.any((u) => u.email.toLowerCase() == usuario.email.toLowerCase());
+    if (existeEmail) {
+      throw StateError('Ya existe un usuario con ese email');
+    }
+
+    // Si pasó validaciones, guardar
+    repositorio.agregarUsuario(usuario);
   }
 }

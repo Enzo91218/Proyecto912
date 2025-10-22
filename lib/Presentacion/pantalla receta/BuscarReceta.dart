@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
+import '../cubit/recetas_cubit.dart';
+import '../../dominio/entidades/ingrediente.dart';
 
 class PantallaRecetas extends StatefulWidget {
   const PantallaRecetas({super.key});
@@ -13,15 +17,25 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
   String resultado = "";
 
   void _buscarReceta() {
-    setState(() {
-      resultado = "Buscando recetas con: ${_controller.text}";
-    });
+    final ingredientes = _controller.text
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .map((s) => Ingrediente(id: s, nombre: s, cantidad: 'a gusto'))
+        .toList();
+    context.read<RecetasCubit>().buscar(ingredientes);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Buscar Receta")),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => context.go('/'),
+        ),
+        title: const Text("Buscar Receta"),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -40,10 +54,23 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
               ),
             ),
             const SizedBox(height: 20),
-            Text(
-              resultado,
-              style: const TextStyle(fontSize: 18),
-            ),
+            BlocBuilder<RecetasCubit, RecetasState>(builder: (context, state) {
+              if (state is RecetasLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is RecetasLoaded) {
+                return Expanded(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: state.recetas
+                        .map((r) => ListTile(title: Text(r.titulo), subtitle: Text(r.descripcion)))
+                        .toList(),
+                  ),
+                );
+              } else if (state is RecetasError) {
+                return Text('Error: ${state.mensaje}');
+              }
+              return Text(resultado, style: const TextStyle(fontSize: 18));
+            }),
             const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
