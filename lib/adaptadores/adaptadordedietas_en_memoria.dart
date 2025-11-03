@@ -17,8 +17,8 @@ class RepositorioDeDietasA implements RepositorioDeDietas {
           Ingrediente(id: '13', nombre: 'Huevos', cantidad: '3 unidades'),
           Ingrediente(id: '14', nombre: 'Queso', cantidad: '50g'),
         ],
-  ),
-  Dieta(
+      ),
+      Dieta(
         id: '2',
         nombre: 'Dieta Vegana',
         recetasIds: ['3'],
@@ -26,8 +26,8 @@ class RepositorioDeDietasA implements RepositorioDeDietas {
           Ingrediente(id: '15', nombre: 'Tofu', cantidad: '150g'),
           Ingrediente(id: '16', nombre: 'Lentejas', cantidad: '100g'),
         ],
-  ),
-  Dieta(
+      ),
+      Dieta(
         id: '3',
         nombre: 'Dieta Balanceada',
         recetasIds: ['1', '3'],
@@ -38,6 +38,14 @@ class RepositorioDeDietasA implements RepositorioDeDietas {
       ),
     ];
 
-    return todas;
+    if (ingredientes.isEmpty) {
+      return todas;
+    }
+
+    final buscados = ingredientes.map((i) => i.nombre.toLowerCase()).toList();
+    return todas.where((d) {
+      final nombres = d.ingredientes.map((i) => i.nombre.toLowerCase()).toList();
+      return buscados.every((b) => nombres.contains(b));
+    }).toList();
   }
 }
