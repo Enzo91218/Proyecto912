@@ -26,6 +26,13 @@ class _PantallaIMCState extends State<PantallaIMC> {
     });
   }
 
+  @override
+  void dispose() {
+    pesoCtrl.dispose();
+    alturaCtrl.dispose();
+    super.dispose();
+  }
+
   void _calcularIMC() {
     final peso = double.tryParse(pesoCtrl.text);
     final altura = double.tryParse(alturaCtrl.text);

@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import '../../aplicacion/casos_de_uso/buscar_dietas.dart';
+import '../../dominio/entidades/ingrediente.dart';
 import '../../dominio/entidades/receta.dart';
 
 abstract class DietasState {}
@@ -18,10 +19,10 @@ class DietasCubit extends Cubit<DietasState> {
   final BuscarDietas casoUso;
   DietasCubit(this.casoUso) : super(DietasInitial());
 
-  Future<void> buscar(String nombreDieta) async {
+  Future<void> buscar(String nombreDieta, {List<Ingrediente> ingredientes = const []}) async {
     emit(DietasLoading());
     try {
-      final recetas = casoUso.call(nombreDieta);
+      final recetas = casoUso.call(nombreDieta, ingredientes: ingredientes);
       emit(DietasLoaded(recetas));
     } catch (e) {
       emit(DietasError(e.toString()));
