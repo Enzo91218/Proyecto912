@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../cubit/dietas_cubit.dart';
+import '../../dominio/entidades/ingrediente.dart';
 
 class PantallaDietas extends StatefulWidget {
   const PantallaDietas({super.key});
@@ -13,12 +14,26 @@ class PantallaDietas extends StatefulWidget {
 
 class _PantallaDietasState extends State<PantallaDietas> {
   final TextEditingController _controller = TextEditingController();
+  final TextEditingController _ingredientesController = TextEditingController();
   String resultado = "";
 
   void _buscarDieta() {
     final nombre = _controller.text.trim();
     if (nombre.isEmpty) return;
-    context.read<DietasCubit>().buscar(nombre);
+    final ingredientes = _ingredientesController.text
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .map((s) => Ingrediente(id: s, nombre: s, cantidad: 'a gusto'))
+        .toList();
+    context.read<DietasCubit>().buscar(nombre, ingredientes: ingredientes);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _ingredientesController.dispose();
+    super.dispose();
   }
 
   @override
@@ -39,6 +54,16 @@ class _PantallaDietasState extends State<PantallaDietas> {
               controller: _controller,
               decoration: InputDecoration(
                 labelText: "Tipo de dieta (ej. keto, vegana, etc.)",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _ingredientesController,
+              decoration: InputDecoration(
+                labelText: "Ingredientes (separados por coma)",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

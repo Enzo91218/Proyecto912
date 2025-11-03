@@ -18,6 +18,14 @@ class _PantallaRegistrarUsuarioState extends State<PantallaRegistrarUsuario> {
   final passCtrl = TextEditingController();
 
   @override
+  void dispose() {
+    nombreCtrl.dispose();
+    emailCtrl.dispose();
+    passCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
