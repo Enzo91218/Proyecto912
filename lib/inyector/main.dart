@@ -18,6 +18,7 @@ import '../aplicacion/casos_de_uso/buscar_dietas.dart';
 import '../aplicacion/casos_de_uso/calcular_imc.dart';
 import '../aplicacion/casos_de_uso/buscar_usuarios.dart';
 import '../aplicacion/casos_de_uso/registrar_usuario.dart';
+import '../aplicacion/casos_de_uso/actualizar_usuario.dart';
 import '../presentacion/cubit/recetas_cubit.dart';
 import '../presentacion/cubit/dietas_cubit.dart';
 import '../presentacion/cubit/imc_cubit.dart';
@@ -30,43 +31,50 @@ import '../presentacion/cubit/registrar_cubit.dart';
 final getIt = GetIt.instance;
 
 void setupInyector() {
-	// Repositorios -> Adaptadores
-	getIt.registerLazySingleton<RepositorioDeRecetas>(() => RepositorioDeRecetasA());
-	getIt.registerLazySingleton<RepositorioDeDietas>(() => RepositorioDeDietasA());
-	getIt.registerLazySingleton<RepositorioDeUsuario>(() => RepositorioDeUsuarioA());
-	getIt.registerLazySingleton<RepositorioDeRegistroIMC>(() => RepositorioDeRegistroIMCA());
+  // Repositorios -> Adaptadores
+  getIt.registerLazySingleton<RepositorioDeRecetas>(
+      () => RepositorioDeRecetasA());
+  getIt.registerLazySingleton<RepositorioDeDietas>(
+      () => RepositorioDeDietasA());
+  getIt.registerLazySingleton<RepositorioDeUsuario>(
+      () => RepositorioDeUsuarioA());
+  getIt.registerLazySingleton<RepositorioDeRegistroIMC>(
+      () => RepositorioDeRegistroIMCA());
 
+  // Casos de uso reales
+  getIt.registerLazySingleton(
+      () => BuscarRecetas(getIt<RepositorioDeRecetas>()));
+  // BuscarDietas ahora necesita el repositorio de dietas y el de recetas
+  getIt.registerLazySingleton(() =>
+      BuscarDietas(getIt<RepositorioDeDietas>(), getIt<RepositorioDeRecetas>()));
+  getIt.registerLazySingleton(
+      () => CalcularIMC(getIt<RepositorioDeRegistroIMC>()));
+  getIt.registerLazySingleton(() => BuscarUsuarios(getIt<RepositorioDeUsuario>()));
+  getIt.registerLazySingleton(() => RegistrarUsuario(getIt<RepositorioDeUsuario>()));
+  getIt.registerLazySingleton(() => ActualizarUsuario(getIt<RepositorioDeUsuario>()));
 
-	// Casos de uso reales
-	getIt.registerLazySingleton(() => BuscarRecetas(getIt<RepositorioDeRecetas>()));
-	// BuscarDietas ahora necesita el repositorio de dietas y el de recetas
-	getIt.registerLazySingleton(() => BuscarDietas(getIt<RepositorioDeDietas>(), getIt<RepositorioDeRecetas>()));
-	getIt.registerLazySingleton(() => CalcularIMC(getIt<RepositorioDeRegistroIMC>()));
-	getIt.registerLazySingleton(() => BuscarUsuarios(getIt<RepositorioDeUsuario>()));
-	getIt.registerLazySingleton(() => RegistrarUsuario(getIt<RepositorioDeUsuario>()));
-
-		// Cubits (registrar como factory para crear instancias nuevas cuando BlocProvider las pida)
-		getIt.registerFactory(() => RecetasCubit(getIt<BuscarRecetas>()));
-		getIt.registerFactory(() => DietasCubit(getIt<BuscarDietas>()));
-		getIt.registerFactory(() => IMCCubit(getIt<CalcularIMC>()));
-			getIt.registerFactory(() => LoginCubit(getIt<BuscarUsuarios>()));
-				getIt.registerFactory(() => RegistrarCubit(getIt<RegistrarUsuario>()));
+  // Cubits (registrar como factory para crear instancias nuevas cuando BlocProvider las pida)
+  getIt.registerFactory(() => RecetasCubit(getIt<BuscarRecetas>()));
+  getIt.registerFactory(() => DietasCubit(getIt<BuscarDietas>()));
+  getIt.registerFactory(() => IMCCubit(getIt<CalcularIMC>()));
+  getIt.registerFactory(() => LoginCubit(getIt<BuscarUsuarios>()));
+  getIt.registerFactory(() => RegistrarCubit(getIt<RegistrarUsuario>()));
 }
 
 void main() {
-	setupInyector();
-	runApp(const MyApp());
+  setupInyector();
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-	const MyApp({super.key});
+  const MyApp({super.key});
 
-	@override
-	Widget build(BuildContext context) {
-		return MaterialApp.router(
-			title: 'Proyecto912',
-			routerConfig: appRouter,
-			debugShowCheckedModeBanner: false,
-		);
-	}
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: 'Proyecto912',
+      routerConfig: appRouter,
+      debugShowCheckedModeBanner: false,
+    );
+  }
 }
