@@ -18,6 +18,7 @@ import '../aplicacion/casos_de_uso/buscar_dietas.dart';
 import '../aplicacion/casos_de_uso/calcular_imc.dart';
 import '../aplicacion/casos_de_uso/buscar_usuarios.dart';
 import '../aplicacion/casos_de_uso/registrar_usuario.dart';
+import '../aplicacion/casos_de_uso/actualizar_usuario.dart';
 import '../presentacion/cubit/recetas_cubit.dart';
 import '../presentacion/cubit/dietas_cubit.dart';
 import '../presentacion/cubit/imc_cubit.dart';
@@ -43,7 +44,8 @@ void setupInyector() {
 	getIt.registerLazySingleton(() => BuscarDietas(getIt<RepositorioDeDietas>(), getIt<RepositorioDeRecetas>()));
 	getIt.registerLazySingleton(() => CalcularIMC(getIt<RepositorioDeRegistroIMC>()));
 	getIt.registerLazySingleton(() => BuscarUsuarios(getIt<RepositorioDeUsuario>()));
-	getIt.registerLazySingleton(() => RegistrarUsuario(getIt<RepositorioDeUsuario>()));
+        getIt.registerLazySingleton(() => RegistrarUsuario(getIt<RepositorioDeUsuario>()));
+        getIt.registerLazySingleton(() => ActualizarUsuario(getIt<RepositorioDeUsuario>()));
 
 		// Cubits (registrar como factory para crear instancias nuevas cuando BlocProvider las pida)
 		getIt.registerFactory(() => RecetasCubit(getIt<BuscarRecetas>()));

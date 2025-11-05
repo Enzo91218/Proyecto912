@@ -48,4 +48,13 @@ class RepositorioDeUsuarioA implements RepositorioDeUsuario {
   void agregarUsuario(Usuario usuario) {
     _usuarios.add(usuario);
   }
+
+  @override
+  void actualizarUsuario(Usuario usuarioActualizado) {
+    final index = _usuarios.indexWhere((usuario) => usuario.id == usuarioActualizado.id);
+    if (index == -1) {
+      throw StateError('Usuario con id \'${usuarioActualizado.id}\' no encontrado');
+    }
+    _usuarios[index] = usuarioActualizado;
+  }
 }
