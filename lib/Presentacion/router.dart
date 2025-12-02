@@ -1,18 +1,24 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
 import '../inyector/main.dart' as inyector;
+import '../servicios/usuario_actual.dart';
 import 'cubit/recetas_cubit.dart';
 import 'cubit/dietas_cubit.dart';
 import 'cubit/imc_cubit.dart';
+import 'cubit/registro_peso_cubit.dart';
+import 'cubit/balance_peso_cubit.dart';
+import 'cubit/login_cubit.dart';
 import 'calcularIMC/CalcularIMC.dart';
 import 'pantalla menu/menu.dart';
 import 'pantalla receta/BuscarReceta.dart';
 import 'pantalla dieta/BuscarDieta.dart';
 import 'pantalla login/Login.dart';
-import 'cubit/login_cubit.dart';
 import 'pantalla registro/RegistrarUsuario.dart';
 import 'cubit/registrar_cubit.dart';
+import 'pantalla_registro_peso/pantalla_registro_peso.dart';
+import 'pantalla_balance_peso/pantalla_balance_peso.dart';
 
 final GoRouter appRouter = GoRouter(
   // Iniciar la app en la pantalla de login
@@ -46,6 +52,36 @@ final GoRouter appRouter = GoRouter(
         create: (_) => inyector.getIt<IMCCubit>(),
         child: const PantallaIMC(),
       ),
+    ),
+    GoRoute(
+      path: '/registro-peso',
+      name: 'registro-peso',
+      builder: (context, state) {
+        final usuarioActual = GetIt.instance.get<UsuarioActual>();
+        final usuarioId = usuarioActual.id;
+        return BlocProvider(
+          create: (_) => RegistroPesoCubit(
+            repositorio: inyector.getIt(),
+            usuarioId: usuarioId,
+          ),
+          child: const PantallaRegistroPeso(),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/balance-peso',
+      name: 'balance-peso',
+      builder: (context, state) {
+        final usuarioActual = GetIt.instance.get<UsuarioActual>();
+        final usuarioId = usuarioActual.id;
+        return BlocProvider(
+          create: (_) => BalancePesoCubit(
+            casoDeUso: inyector.getIt(),
+            usuarioId: usuarioId,
+          ),
+          child: const PantallaBalancePeso(),
+        );
+      },
     ),
     GoRoute(
       path: '/login',

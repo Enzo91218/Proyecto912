@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:get_it/get_it.dart';
+import 'dart:io';
+import '../../aplicacion/casos_de_uso/cerrar_sesion.dart';
 
 class PantallaMenu extends StatelessWidget {
   const PantallaMenu({super.key});
@@ -69,10 +72,35 @@ class PantallaMenu extends StatelessWidget {
                       onTap: () => context.go('/imc'),
                     ),
                     _MenuCardHorizontal(
+                      icon: Icons.history,
+                      text: 'Registro Peso',
+                      color: Colors.amber.shade600,
+                      onTap: () => context.go('/registro-peso'),
+                    ),
+                    _MenuCardHorizontal(
+                      icon: Icons.trending_up,
+                      text: 'Balance Peso',
+                      color: Colors.amber.shade600,
+                      onTap: () => context.go('/balance-peso'),
+                    ),
+                    _MenuCardHorizontal(
+                      icon: Icons.logout,
+                      text: 'Cerrar Sesión',
+                      color: Colors.orange,
+                      onTap: () {
+                        // Cerrar sesión y volver a login
+                        GetIt.instance.get<CerrarSesion>().cerrarSesion();
+                        context.go('/login');
+                      },
+                    ),
+                    _MenuCardHorizontal(
                       icon: Icons.exit_to_app,
                       text: 'Salir',
                       color: Colors.redAccent,
-                      onTap: () => Navigator.of(context).pop(),
+                      onTap: () {
+                        // Cierra la aplicación completamente
+                        exit(0);
+                      },
                     ),
                   ],
                 ),
