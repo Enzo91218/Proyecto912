@@ -6,8 +6,12 @@ class BalancePesoInicial extends BalancePesoState {}
 
 class BalancePesoCargado extends BalancePesoState {
   final BalancePesoAltura balance;
+  final int? puntoSeleccionado;
 
-  BalancePesoCargado({required this.balance});
+  BalancePesoCargado({
+    required this.balance,
+    this.puntoSeleccionado,
+  });
 }
 
 class BalancePesoError extends BalancePesoState {

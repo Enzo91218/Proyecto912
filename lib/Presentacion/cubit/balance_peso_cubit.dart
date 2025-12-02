@@ -21,4 +21,24 @@ class BalancePesoCubit extends Cubit<BalancePesoState> {
       emit(BalancePesoError(mensaje: e.toString()));
     }
   }
+
+  void seleccionarPunto(int index) {
+    final currentState = state;
+    if (currentState is BalancePesoCargado) {
+      emit(BalancePesoCargado(
+        balance: currentState.balance,
+        puntoSeleccionado: index,
+      ));
+    }
+  }
+
+  void deseleccionarPunto() {
+    final currentState = state;
+    if (currentState is BalancePesoCargado) {
+      emit(BalancePesoCargado(
+        balance: currentState.balance,
+        puntoSeleccionado: null,
+      ));
+    }
+  }
 }

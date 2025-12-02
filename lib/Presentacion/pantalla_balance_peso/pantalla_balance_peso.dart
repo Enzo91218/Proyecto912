@@ -44,181 +44,232 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Tarjeta de datos actuales
-                  Card(
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Datos Actuales',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                  TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 600),
+                    builder: (context, value, child) {
+                      return Opacity(
+                        opacity: value,
+                        child: Transform.translate(
+                          offset: Offset(0, -20 * (1 - value)),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Datos Actuales',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              _DatoActual(
-                                label: 'Peso',
-                                valor: '${balance.pesoActual.toStringAsFixed(2)} kg',
-                                icono: Icons.monitor_weight,
-                              ),
-                              _DatoActual(
-                                label: 'Altura',
-                                valor:
-                                    '${balance.alturaActual.toStringAsFixed(2)} m',
-                                icono: Icons.height,
-                              ),
-                              _DatoActual(
-                                label: 'IMC',
-                                valor: balance.imc.toStringAsFixed(2),
-                                icono: Icons.calculate,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: _obtenerColorCategoria(balance.categoria),
-                              borderRadius: BorderRadius.circular(8),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _DatoActual(
+                                  label: 'Peso',
+                                  valor: '${balance.pesoActual.toStringAsFixed(2)} kg',
+                                  icono: Icons.monitor_weight,
+                                ),
+                                _DatoActual(
+                                  label: 'Altura',
+                                  valor:
+                                      '${balance.alturaActual.toStringAsFixed(2)} m',
+                                  icono: Icons.height,
+                                ),
+                                _DatoActual(
+                                  label: 'IMC',
+                                  valor: balance.imc.toStringAsFixed(2),
+                                  icono: Icons.calculate,
+                                ),
+                              ],
                             ),
-                            child: Center(
-                              child: Text(
-                                'Categoría: ${balance.categoria}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: _obtenerColorCategoria(balance.categoria),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Categoría: ${balance.categoria}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
 
                   // Tarjeta de progreso de peso
-                  Card(
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Progreso de Peso',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                  TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 800),
+                    builder: (context, value, child) {
+                      return Opacity(
+                        opacity: value,
+                        child: Transform.translate(
+                          offset: Offset(0, -20 * (1 - value)),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Progreso de Peso',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            height: 250,
-                            child: _GraficoProgresoLineal(
-                              puntos: balance.puntos,
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              height: 250,
+                              child: _GraficoProgresoLineal(
+                                puntos: balance.puntos,
+                                onPuntoSeleccionado: (index) {
+                                  context.read<BalancePesoCubit>().seleccionarPunto(index);
+                                },
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          _ResumenProgreso(
-                            puntos: balance.puntos,
-                          ),
-                        ],
+                            const SizedBox(height: 12),
+                            if (state.puntoSeleccionado != null)
+                              _DetallePuntoSeleccionado(
+                                puntos: balance.puntos,
+                                indicePuntoSeleccionado: state.puntoSeleccionado!,
+                                onDeseleccionar: () {
+                                  context.read<BalancePesoCubit>().deseleccionarPunto();
+                                },
+                              )
+                            else
+                              _ResumenProgreso(
+                                puntos: balance.puntos,
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
 
                   // Tarjeta de hidratación
-                  Card(
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Plan de Hidratación',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.blue.shade300,
+                  TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 1000),
+                    builder: (context, value, child) {
+                      return Opacity(
+                        opacity: value,
+                        child: Transform.translate(
+                          offset: Offset(0, -20 * (1 - value)),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Plan de Hidratación',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text(
-                                      'Agua diaria recomendada:',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                    Text(
-                                      '${balance.litrosAgua.toStringAsFixed(2)} L',
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blue,
-                                      ),
-                                    ),
-                                  ],
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.blue.shade300,
                                 ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text(
-                                      'Intervalo entre vasos:',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                    Text(
-                                      '${balance.minutosIntervalo} minutos',
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blue,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                        'Agua diaria recomendada:',
+                                        style: TextStyle(fontSize: 16),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
-                                const Divider(),
-                                const SizedBox(height: 12),
-                                const Text(
-                                  'Horario sugerido de consumo:',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
+                                      Text(
+                                        '${balance.litrosAgua.toStringAsFixed(2)} L',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                _HorarioAgua(
-                                  minutosIntervalo: balance.minutosIntervalo,
-                                ),
-                              ],
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                        'Intervalo entre vasos:',
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                      Text(
+                                        '${balance.minutosIntervalo} minutos',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Divider(),
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    'Horario sugerido de consumo:',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _HorarioAgua(
+                                    minutosIntervalo: balance.minutosIntervalo,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -258,7 +309,7 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
   }
 }
 
-class _DatoActual extends StatelessWidget {
+class _DatoActual extends StatefulWidget {
   final String label;
   final String valor;
   final IconData icono;
@@ -270,17 +321,49 @@ class _DatoActual extends StatelessWidget {
   });
 
   @override
+  State<_DatoActual> createState() => _DatoActualState();
+}
+
+class _DatoActualState extends State<_DatoActual> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icono, size: 32, color: Colors.blue),
+        ScaleTransition(
+          scale: _scaleAnimation,
+          child: Icon(widget.icono, size: 32, color: Colors.blue),
+        ),
         const SizedBox(height: 8),
         Text(
-          label,
+          widget.label,
           style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
         Text(
-          valor,
+          widget.valor,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -293,8 +376,12 @@ class _DatoActual extends StatelessWidget {
 
 class _GraficoProgresoLineal extends StatelessWidget {
   final List<RegistroPesoAlturaPunto> puntos;
+  final Function(int)? onPuntoSeleccionado;
 
-  const _GraficoProgresoLineal({required this.puntos});
+  const _GraficoProgresoLineal({
+    required this.puntos,
+    this.onPuntoSeleccionado,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -304,9 +391,20 @@ class _GraficoProgresoLineal extends StatelessWidget {
       );
     }
 
-    return CustomPaint(
-      painter: _GraficoPainter(puntos),
-      child: Container(),
+    return GestureDetector(
+      onTapDown: (details) {
+        // Calcular qué punto fue tocado
+        final painter = _GraficoPainter(puntos);
+        final posicion = details.localPosition;
+        final indice = painter.obtenerIndicePuntoEnPosicion(posicion);
+        if (indice != -1) {
+          onPuntoSeleccionado?.call(indice);
+        }
+      },
+      child: CustomPaint(
+        painter: _GraficoPainter(puntos),
+        child: Container(),
+      ),
     );
   }
 }
@@ -315,6 +413,8 @@ class _GraficoPainter extends CustomPainter {
   final List<RegistroPesoAlturaPunto> puntos;
 
   _GraficoPainter(this.puntos);
+
+  List<Offset> posicionesPuntos = [];
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -354,6 +454,8 @@ class _GraficoPainter extends CustomPainter {
       linePaint,
     );
 
+    posicionesPuntos.clear();
+
     // Dibujar línea del gráfico
     for (int i = 0; i < puntos.length - 1; i++) {
       final x1 = padding + (i / (puntos.length - 1)) * graphWidth;
@@ -376,8 +478,21 @@ class _GraficoPainter extends CustomPainter {
           padding -
           ((puntos[i].peso - pesoMin) / diferencia) * graphHeight;
 
+      posicionesPuntos.add(Offset(x, y));
+
       canvas.drawCircle(Offset(x, y), 4, circlePaint);
     }
+  }
+
+  int obtenerIndicePuntoEnPosicion(Offset posicion) {
+    const tolerancia = 20.0;
+    for (int i = 0; i < posicionesPuntos.length; i++) {
+      final distancia = (posicion - posicionesPuntos[i]).distance;
+      if (distancia < tolerancia) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   @override
@@ -450,24 +565,158 @@ class _HorarioAgua extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: horas
-          .map(
-            (hora) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(20),
+      children: List.generate(
+        horas.length,
+        (index) => TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: 1),
+          duration: Duration(milliseconds: 300 + (index * 100)),
+          builder: (context, value, child) {
+            return Transform.scale(
+              scale: value,
+              child: Opacity(
+                opacity: value,
+                child: child,
               ),
-              child: Text(
-                hora,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              horas[index],
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          )
-          .toList(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DetallePuntoSeleccionado extends StatelessWidget {
+  final List<RegistroPesoAlturaPunto> puntos;
+  final int indicePuntoSeleccionado;
+  final VoidCallback onDeseleccionar;
+
+  const _DetallePuntoSeleccionado({
+    required this.puntos,
+    required this.indicePuntoSeleccionado,
+    required this.onDeseleccionar,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (indicePuntoSeleccionado < 0 || indicePuntoSeleccionado >= puntos.length) {
+      return const SizedBox();
+    }
+
+    final punto = puntos[indicePuntoSeleccionado];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        border: Border.all(color: Colors.blue, width: 2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Datos del Punto Seleccionado',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: onDeseleccionar,
+                tooltip: 'Deseleccionar',
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    const Text(
+                      'Peso',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${punto.peso.toStringAsFixed(2)} kg',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    const Text(
+                      'Altura',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${punto.altura.toStringAsFixed(2)} m',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    const Text(
+                      'Fecha',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${punto.fecha.day}/${punto.fecha.month}/${punto.fecha.year}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

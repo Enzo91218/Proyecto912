@@ -52,27 +52,41 @@ class _PantallaRegistroPesoState extends State<PantallaRegistroPeso> {
                 final fechaFormato =
                     '${registro.fecha.day}/${registro.fecha.month}/${registro.fecha.year} ${registro.fecha.hour}:${registro.fecha.minute.toString().padLeft(2, '0')}';
 
-                return Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 8,
-                  ),
-                  child: ListTile(
-                    leading: const Icon(Icons.monitor_weight, color: Colors.blue),
-                    title: Text(
-                      'Peso: ${registro.peso.toStringAsFixed(2)} kg',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                return TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: Duration(milliseconds: 300 + (index * 100)),
+                  builder: (context, value, child) {
+                    return Transform.translate(
+                      offset: Offset(0, 20 * (1 - value)),
+                      child: Opacity(
+                        opacity: value,
+                        child: child,
                       ),
+                    );
+                  },
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
                     ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 8),
-                        Text('Altura: ${registro.altura.toStringAsFixed(2)} m'),
-                        Text('Fecha: $fechaFormato'),
-                      ],
+                    elevation: 4,
+                    child: ListTile(
+                      leading: const Icon(Icons.monitor_weight, color: Colors.blue),
+                      title: Text(
+                        'Peso: ${registro.peso.toStringAsFixed(2)} kg',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
+                          Text('Altura: ${registro.altura.toStringAsFixed(2)} m'),
+                          Text('Fecha: $fechaFormato'),
+                        ],
+                      ),
                     ),
                   ),
                 );

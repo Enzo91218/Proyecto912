@@ -54,11 +54,36 @@ class _PantallaDietasState extends State<PantallaDietas> {
                 return const Center(child: CircularProgressIndicator());
               } else if (state is DietasLoaded) {
                 return Expanded(
-                  child: ListView(
+                  child: ListView.builder(
                     shrinkWrap: true,
-                    children: state.recetas
-                        .map((r) => ListTile(title: Text(r.titulo), subtitle: Text(r.descripcion)))
-                        .toList(),
+                    itemCount: state.recetas.length,
+                    itemBuilder: (context, index) {
+                      final receta = state.recetas[index];
+                      return TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: 0, end: 1),
+                        duration: Duration(milliseconds: 300 + (index * 100)),
+                        builder: (context, value, child) {
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: Opacity(
+                              opacity: value,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          elevation: 4,
+                          child: ListTile(
+                            title: Text(
+                              receta.titulo,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(receta.descripcion),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 );
               } else if (state is DietasError) {
