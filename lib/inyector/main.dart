@@ -9,11 +9,11 @@ import '../dominio/repositorios/repositorio_de_usuario.dart';
 import '../dominio/repositorios/repositorio_de_registroIMC.dart';
 import '../dominio/repositorios/repositorio_de_registro_peso_altura.dart';
 
-import '../adaptadores/adaptadorderecetas_en_memoria.dart';
-import '../adaptadores/adaptadordedietas_en_memoria.dart';
-import '../adaptadores/adaptadordeusuario_en_memoria.dart';
-import '../adaptadores/adaptadorderegistroIMC_en_memoria.dart';
-import '../adaptadores/adaptador_registro_peso_altura_en_memoria.dart';
+import '../adaptadores/sqlite/dietas/dieta_sqlite_adaptador.dart';
+import '../adaptadores/sqlite/recetas/receta_sqlite_adaptador.dart';
+import '../adaptadores/sqlite/registro_imc/registro_imc_sqlite_adaptador.dart';
+import '../adaptadores/sqlite/registro_peso_altura/registro_peso_altura_sqlite_adaptador.dart';
+import '../adaptadores/sqlite/usuarios/usuario_sqlite_adaptador.dart';
 
 // Importar casos de uso reales
 import '../aplicacion/casos_de_uso/buscar_recetas.dart';
@@ -40,11 +40,11 @@ void setupInyector() {
 	getIt.registerSingleton<UsuarioActual>(UsuarioActual());
 
 	// Repositorios -> Adaptadores
-	getIt.registerLazySingleton<RepositorioDeRecetas>(() => RepositorioDeRecetasA());
-	getIt.registerLazySingleton<RepositorioDeDietas>(() => RepositorioDeDietasA());
-	getIt.registerLazySingleton<RepositorioDeUsuario>(() => RepositorioDeUsuarioA());
-	getIt.registerLazySingleton<RepositorioDeRegistroIMC>(() => RepositorioDeRegistroIMCA());
-	getIt.registerLazySingleton<RepositorioDeRegistroPesoAltura>(() => RepositorioDeRegistroPesoAlturaA());
+        getIt.registerLazySingleton<RepositorioDeRecetas>(() => RepositorioDeRecetasSQLite());
+        getIt.registerLazySingleton<RepositorioDeDietas>(() => RepositorioDeDietasSQLite());
+        getIt.registerLazySingleton<RepositorioDeUsuario>(() => RepositorioDeUsuarioSQLite());
+        getIt.registerLazySingleton<RepositorioDeRegistroIMC>(() => RepositorioDeRegistroIMCSQLite());
+        getIt.registerLazySingleton<RepositorioDeRegistroPesoAltura>(() => RepositorioDeRegistroPesoAlturaSQLite());
 
 
 	// Casos de uso reales
