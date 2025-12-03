@@ -19,6 +19,7 @@ import 'pantalla registro/RegistrarUsuario.dart';
 import 'cubit/registrar_cubit.dart';
 import 'pantalla_registro_peso/pantalla_registro_peso.dart';
 import 'pantalla_balance_peso/pantalla_balance_peso.dart';
+import 'pantalla_herramientas/herramientas.dart';
 
 final GoRouter appRouter = GoRouter(
   // Iniciar la app en la pantalla de login
@@ -98,6 +99,11 @@ final GoRouter appRouter = GoRouter(
         create: (_) => inyector.getIt<RegistrarCubit>(),
         child: const PantallaRegistrarUsuario(),
       ),
+    ),
+    GoRoute(
+      path: '/herramientas',
+      name: 'herramientas',
+      builder: (context, state) => const PantallaHerramientas(),
     ),
   ],
 );

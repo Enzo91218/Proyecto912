@@ -1,5 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:path/path.dart' as p;
 import '../presentacion/router.dart';
 import '../servicios/usuario_actual.dart';
 // Importar repositorios y adaptadores
@@ -29,11 +32,43 @@ import '../presentacion/cubit/recetas_cubit.dart';
 import '../presentacion/cubit/dietas_cubit.dart';
 import '../presentacion/cubit/imc_cubit.dart';
 import '../presentacion/cubit/login_cubit.dart';
+import '../presentacion/cubit/registrar_cubit.dart';
 
 
 // El registro de casos de uso se realiza con las clases implementadas en aplicacion/casos_de_uso
 
 final getIt = GetIt.instance;
+
+/// Copia el archivo de base de datos desde assets si no existe
+Future<void> _initializeDatabase() async {
+	final dbFolder = p.join(
+		Directory.systemTemp.path,
+		'proyecto912_db',
+	);
+	
+	final dir = Directory(dbFolder);
+	if (!dir.existsSync()) {
+		dir.createSync(recursive: true);
+	}
+
+	final dbPath = p.join(dbFolder, 'proyecto912.db');
+	final dbFile = File(dbPath);
+
+	// Si la base de datos no existe, copiarla desde assets
+	if (!dbFile.existsSync()) {
+		try {
+			final data = await rootBundle.load('assets/db/proyectoi912.db');
+			final bytes = data.buffer.asUint8List();
+			if (bytes.isNotEmpty) {
+				await dbFile.writeAsBytes(bytes, flush: true);
+				print('Base de datos copiada desde assets');
+			}
+		} catch (e) {
+			print('Error al copiar base de datos desde assets: $e');
+			// Si falla, las tablas se crearán vacías
+		}
+	}
+}
 
 void setupInyector() {
 	// Servicio de usuario actual
@@ -53,20 +88,23 @@ void setupInyector() {
 	getIt.registerLazySingleton(() => BuscarDietas(getIt<RepositorioDeDietas>(), getIt<RepositorioDeRecetas>()));
 	getIt.registerLazySingleton(() => CalcularIMC(getIt<RepositorioDeRegistroIMC>()));
 	getIt.registerLazySingleton(() => BuscarUsuarios(getIt<RepositorioDeUsuario>()));
-	getIt.registerLazySingleton(() => RegistrarUsuario(getIt<RepositorioDeUsuario>()));
+	getIt.registerLazySingleton(() => RegistrarUsuario(getIt<RepositorioDeUsuario>(), repositorioPesoAltura: getIt<RepositorioDeRegistroPesoAltura>()));
 	getIt.registerLazySingleton(() => ActualizarPesoAltura(repositorio: getIt<RepositorioDeUsuario>()));
 	getIt.registerLazySingleton(() => RegistroPesoAlturaUC(repositorio: getIt<RepositorioDeRegistroPesoAltura>()));
 	getIt.registerLazySingleton(() => BalancePesoAlturaUC(repositorio: getIt<RepositorioDeRegistroPesoAltura>()));
 	getIt.registerLazySingleton(() => CerrarSesion());
 
-		// Cubits (registrar como factory para crear instancias nuevas cuando BlocProvider las pida)
-		getIt.registerFactory(() => RecetasCubit(getIt<BuscarRecetas>()));
-		getIt.registerFactory(() => DietasCubit(getIt<BuscarDietas>()));
-		getIt.registerFactory(() => IMCCubit(getIt<CalcularIMC>()));
-		getIt.registerFactory(() => LoginCubit(getIt<BuscarUsuarios>()));
+	// Cubits (registrar como factory para crear instancias nuevas cuando BlocProvider las pida)
+	getIt.registerFactory(() => RecetasCubit(getIt<BuscarRecetas>()));
+	getIt.registerFactory(() => DietasCubit(getIt<BuscarDietas>()));
+	getIt.registerFactory(() => IMCCubit(getIt<CalcularIMC>()));
+	getIt.registerFactory(() => LoginCubit(getIt<BuscarUsuarios>()));
+	getIt.registerFactory(() => RegistrarCubit(getIt<RegistrarUsuario>()));
 }
 
-void main() {
+Future<void> main() async {
+	WidgetsFlutterBinding.ensureInitialized();
+	await _initializeDatabase();
 	setupInyector();
 	runApp(const MyApp());
 }

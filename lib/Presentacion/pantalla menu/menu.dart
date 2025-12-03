@@ -78,10 +78,16 @@ class PantallaMenu extends StatelessWidget {
                       onTap: () => context.go('/registro-peso'),
                     ),
                     _MenuCardHorizontal(
-                      icon: Icons.trending_up,
+                      icon: Icons.balance_sharp,
                       text: 'Balance Peso',
                       color: Colors.amber.shade600,
                       onTap: () => context.go('/balance-peso'),
+                    ),
+                    _MenuCardHorizontal(
+                      icon: Icons.build,
+                      text: 'Herramientas',
+                      color: Colors.amber.shade600,
+                      onTap: () => context.go('/herramientas'),
                     ),
                     _MenuCardHorizontal(
                       icon: Icons.logout,

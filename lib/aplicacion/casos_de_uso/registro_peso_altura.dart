@@ -1,6 +1,7 @@
 import 'dart:math';
 import '../../dominio/entidades/registro_peso_altura_entidad.dart';
 import '../../dominio/repositorios/repositorio_de_registro_peso_altura.dart';
+import '../../servicios/database_sync_service.dart';
 
 class RegistroPesoAlturaUC {
   final RepositorioDeRegistroPesoAltura repositorio;
@@ -12,7 +13,7 @@ class RegistroPesoAlturaUC {
         Random().nextInt(10000).toString();
   }
 
-  void ejecutar(String usuarioId, double peso, double altura) {
+  Future<void> ejecutar(String usuarioId, double peso, double altura) async {
     final registro = RegistroPesoAltura(
       id: _generarId(),
       usuarioId: usuarioId,
@@ -21,5 +22,8 @@ class RegistroPesoAlturaUC {
       fecha: DateTime.now(),
     );
     repositorio.agregarRegistro(registro);
+    
+    // Sincronizar BD automáticamente
+    await DatabaseSyncService.instance.sincronizarConLog('Registro de peso agregado para usuario: $usuarioId');
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 
@@ -15,7 +14,14 @@ class DatabaseProvider {
   }
 
   Database _openDatabase() {
-    final dbPath = p.join(Directory.systemTemp.path, 'proyecto912.db');
+    // Usar la carpeta de documentos de la app
+    final dbFolder = p.join(
+      Directory.systemTemp.path,
+      'proyecto912_db',
+    );
+    
+    final dbPath = p.join(dbFolder, 'proyecto912.db');
+    
     final db = sqlite3.open(dbPath);
     _createTables(db);
     return db;

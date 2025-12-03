@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:get_it/get_it.dart';
 import 'dart:math';
 
 import '../cubit/imc_cubit.dart';
+import '../../servicios/usuario_actual.dart';
+import '../../aplicacion/casos_de_uso/registro_peso_altura.dart';
 
 class PantallaIMC extends StatefulWidget {
   const PantallaIMC({super.key});
@@ -16,6 +19,7 @@ class _PantallaIMCState extends State<PantallaIMC> {
   final pesoCtrl = TextEditingController();
   final alturaCtrl = TextEditingController();
   String resultado = "";
+  bool _guardando = false;
 
   @override
   void initState() {
@@ -26,7 +30,14 @@ class _PantallaIMCState extends State<PantallaIMC> {
     });
   }
 
-  void _calcularIMC() {
+  @override
+  void dispose() {
+    pesoCtrl.dispose();
+    alturaCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _calcularIMC() async {
     final peso = double.tryParse(pesoCtrl.text);
     final altura = double.tryParse(alturaCtrl.text);
 
@@ -53,6 +64,54 @@ class _PantallaIMCState extends State<PantallaIMC> {
     setState(() {
       resultado = "IMC: ${imc.toStringAsFixed(2)} ($estado)";
     });
+
+    // Guardar el registro de peso y altura en la BD
+    await _guardarRegistro(peso, altura);
+  }
+
+  Future<void> _guardarRegistro(double peso, double altura) async {
+    try {
+      setState(() {
+        _guardando = true;
+      });
+
+      // Obtener el usuario actual
+      final usuarioActual = GetIt.instance.get<UsuarioActual>();
+      final usuarioId = usuarioActual.id;
+
+      // Obtener el caso de uso para registrar peso/altura
+      final registroPesoUC = GetIt.instance.get<RegistroPesoAlturaUC>();
+
+      // Guardar el registro
+      await registroPesoUC.ejecutar(usuarioId, peso, altura / 100); // Convertir cm a metros
+
+      setState(() {
+        _guardando = false;
+      });
+
+      // Mostrar confirmación
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Peso y altura registrados exitosamente'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _guardando = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al guardar: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -91,14 +150,20 @@ class _PantallaIMCState extends State<PantallaIMC> {
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.calculate),
-              label: const Text("Calcular"),
-              onPressed: _calcularIMC,
-            ),
+            _guardando
+                ? const CircularProgressIndicator()
+                : ElevatedButton.icon(
+                    icon: const Icon(Icons.calculate),
+                    label: const Text("Calcular y Guardar"),
+                    onPressed: _calcularIMC,
+                  ),
             const SizedBox(height: 20),
             // Mostrar el resultado calculado inmediatamente (si existe)
-            if (resultado.isNotEmpty) Text(resultado, style: const TextStyle(fontSize: 18)),
+            if (resultado.isNotEmpty)
+              Text(
+                resultado,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             const SizedBox(height: 10),
             BlocBuilder<IMCCubit, IMCState>(builder: (context, state) {
               if (state is IMCLoading) {
@@ -124,9 +189,9 @@ class _PantallaIMCState extends State<PantallaIMC> {
                   onPressed: () => context.go('/'),
                 ),
                 ElevatedButton.icon(
-                  icon: const Icon(Icons.search),
-                  label: const Text("Buscar Dieta"),
-                  onPressed: () => context.go('/dietas'),
+                  icon: const Icon(Icons.history),
+                  label: const Text("Ver Registro"),
+                  onPressed: () => context.go('/registro-peso'),
                 ),
               ],
             ),
@@ -136,3 +201,4 @@ class _PantallaIMCState extends State<PantallaIMC> {
     );
   }
 }
+
