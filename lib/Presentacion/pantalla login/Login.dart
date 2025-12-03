@@ -5,6 +5,8 @@ import 'dart:io';
 
 import '../cubit/login_cubit.dart';
 
+const String _fondoLoginAsset = 'assets/presentacion/pantalla_login/fondo_login.png';
+
 class PantallaLogin extends StatefulWidget {
   const PantallaLogin({super.key});
 
@@ -56,75 +58,103 @@ class _PantallaLoginState extends State<PantallaLogin> with SingleTickerProvider
           ),
           title: const Text('Iniciar sesión'),
         ),
-        body: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(-0.5, 0),
-                    end: Offset.zero,
-                  ).animate(
-                    CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-                  ),
-                  child: TextField(
-                    controller: emailCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                _fondoLoginAsset,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF0D47A1), Color(0xFF1976D2)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
-                SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.5, 0),
-                    end: Offset.zero,
-                  ).animate(
-                    CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-                  ),
-                  child: TextField(
-                    controller: passCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Contraseña',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    obscureText: true,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                BlocConsumer<LoginCubit, LoginState>(
-                  listener: (context, state) {
-                    if (state is LoginSuccess) {
-                      // al iniciar sesión volver al menú
-                      context.go('/');
-                    }
-                    if (state is LoginFailure) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.mensaje)));
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state is LoginLoading) return const CircularProgressIndicator();
-                    return ElevatedButton(
-                      onPressed: () => context.read<LoginCubit>().login(emailCtrl.text, passCtrl.text),
-                      child: const Text('Ingresar'),
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () => context.go('/registrar'),
-                  child: const Text('No tienes cuenta, registrar usuario', style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
-                ),
-              ],
+              ),
             ),
-          ),
+            Positioned.fill(
+              child: Container(color: Colors.black.withOpacity(0.35)),
+            ),
+            SafeArea(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(-0.5, 0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+                        ),
+                        child: TextField(
+                          controller: emailCtrl,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0.5, 0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+                        ),
+                        child: TextField(
+                          controller: passCtrl,
+                          decoration: InputDecoration(
+                            labelText: 'Contraseña',
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          obscureText: true,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      BlocConsumer<LoginCubit, LoginState>(
+                        listener: (context, state) {
+                          if (state is LoginSuccess) {
+                            // al iniciar sesión volver al menú
+                            context.go('/');
+                          }
+                          if (state is LoginFailure) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.mensaje)));
+                          }
+                        },
+                        builder: (context, state) {
+                          if (state is LoginLoading) return const CircularProgressIndicator();
+                          return ElevatedButton(
+                            onPressed: () => context.read<LoginCubit>().login(emailCtrl.text, passCtrl.text),
+                            child: const Text('Ingresar'),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: () => context.go('/registrar'),
+                        child: const Text('No tienes cuenta, registrar usuario', style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
