@@ -69,6 +69,12 @@ class PantallaMenu extends StatelessWidget {
                       onTap: () => context.go('/imc'),
                     ),
                     _MenuCardHorizontal(
+                      icon: Icons.calendar_month,
+                      text: 'Rutinas',
+                      color: Colors.amber.shade600,
+                      onTap: () => context.go('/rutinas'),
+                    ),
+                    _MenuCardHorizontal(
                       icon: Icons.exit_to_app,
                       text: 'Salir',
                       color: Colors.redAccent,

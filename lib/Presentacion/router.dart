@@ -13,6 +13,7 @@ import 'pantalla login/Login.dart';
 import 'cubit/login_cubit.dart';
 import 'pantalla registro/RegistrarUsuario.dart';
 import 'cubit/registrar_cubit.dart';
+import 'pantalla rutina/pantalla_rutinas.dart';
 
 final GoRouter appRouter = GoRouter(
   // Iniciar la app en la pantalla de login
@@ -38,6 +39,11 @@ final GoRouter appRouter = GoRouter(
         create: (_) => inyector.getIt<DietasCubit>(),
         child: const PantallaDietas(),
       ),
+    ),
+    GoRoute(
+      path: '/rutinas',
+      name: 'rutinas',
+      builder: (context, state) => const PantallaRutinas(),
     ),
     GoRoute(
       path: '/imc',
