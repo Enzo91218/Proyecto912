@@ -61,9 +61,21 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
                 return Expanded(
                   child: ListView(
                     shrinkWrap: true,
-                    children: state.recetas
-                        .map((r) => ListTile(title: Text(r.titulo), subtitle: Text(r.descripcion)))
-                        .toList(),
+                    children: state.recetas.map((r) => ListTile(
+                      title: Text(r.titulo),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(r.descripcion),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Ingredientes:',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          ...r.ingredientes.map((ing) => Text('- ${ing.nombre} (${ing.cantidad})')).toList(),
+                        ],
+                      ),
+                    )).toList(),
                   ),
                 );
               } else if (state is RecetasError) {
@@ -84,6 +96,11 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
                   icon: const Icon(Icons.monitor_weight),
                   label: const Text("Calcular IMC"),
                   onPressed: () => context.go('/imc'),
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text("Publicar Receta"),
+                  onPressed: () => context.go('/publicar-receta'),
                 ),
               ],
             ),

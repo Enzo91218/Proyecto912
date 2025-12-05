@@ -3,4 +3,6 @@ import '../entidades/ingrediente.dart';
 
 abstract class RepositorioDeRecetas {
   List<Receta> recetasConIngredientes(List<Ingrediente> ingredientes);
+
+  void agregarReceta(Receta receta);
 }

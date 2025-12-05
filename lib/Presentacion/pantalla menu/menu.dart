@@ -63,6 +63,18 @@ class PantallaMenu extends StatelessWidget {
                       onTap: () => context.go('/dietas'),
                     ),
                     _MenuCardHorizontal(
+                      icon: Icons.add,
+                      text: 'Publicar Receta',
+                      color: Colors.green.shade400,
+                      onTap: () => context.go('/publicar-receta'),
+                    ),
+                    _MenuCardHorizontal(
+                      icon: Icons.search,
+                      text: 'Buscar Receta',
+                      color: Colors.amber.shade600,
+                      onTap: () => context.go('/buscar-receta'),
+                    ),
+                    _MenuCardHorizontal(
                       icon: Icons.monitor_weight,
                       text: 'IMC',
                       color: Colors.amber.shade600,

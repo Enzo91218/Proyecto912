@@ -5,6 +5,7 @@ import '../inyector/main.dart' as inyector;
 import 'cubit/recetas_cubit.dart';
 import 'cubit/dietas_cubit.dart';
 import 'cubit/imc_cubit.dart';
+import 'cubit/publicar_receta_cubit.dart';
 import 'calcularIMC/CalcularIMC.dart';
 import 'pantalla menu/menu.dart';
 import 'pantalla receta/BuscarReceta.dart';
@@ -14,7 +15,7 @@ import 'cubit/login_cubit.dart';
 import 'pantalla registro/RegistrarUsuario.dart';
 import 'cubit/registrar_cubit.dart';
 import 'pantalla rutina/pantalla_rutinas.dart';
-
+import 'pantalla receta/publicar_receta.dart';
 final GoRouter appRouter = GoRouter(
   // Iniciar la app en la pantalla de login
   initialLocation: '/login',
@@ -23,6 +24,19 @@ final GoRouter appRouter = GoRouter(
       path: '/',
       name: 'menu',
       builder: (context, state) => const PantallaMenu(),
+    ),
+    GoRoute(
+      path: '/buscar-receta',
+      name: 'buscar-receta',
+      builder: (context, state) => const PantallaRecetas(),
+    ),
+    GoRoute(
+      path: '/publicar-receta',
+      name: 'publicar-receta',
+      builder: (context, state) => BlocProvider(
+        create: (_) => inyector.getIt<PublicarRecetaCubit>(),
+        child: const PantallaPublicarReceta(),
+      ),
     ),
     GoRoute(
       path: '/recetas',

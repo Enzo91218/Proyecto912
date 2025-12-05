@@ -14,6 +14,7 @@ import '../adaptadores/adaptadorderegistroIMC_en_memoria.dart';
 
 // Importar casos de uso reales
 import '../aplicacion/casos_de_uso/buscar_recetas.dart';
+import '../aplicacion/casos_de_uso/publicar_receta.dart';
 import '../aplicacion/casos_de_uso/buscar_dietas.dart';
 import '../aplicacion/casos_de_uso/calcular_imc.dart';
 import '../aplicacion/casos_de_uso/buscar_usuarios.dart';
@@ -23,6 +24,7 @@ import '../presentacion/cubit/dietas_cubit.dart';
 import '../presentacion/cubit/imc_cubit.dart';
 import '../presentacion/cubit/login_cubit.dart';
 import '../presentacion/cubit/registrar_cubit.dart';
+import '../presentacion/cubit/publicar_receta_cubit.dart';
 
 
 // El registro de casos de uso se realiza con las clases implementadas en aplicacion/casos_de_uso
@@ -39,6 +41,7 @@ void setupInyector() {
 
 	// Casos de uso reales
 	getIt.registerLazySingleton(() => BuscarRecetas(getIt<RepositorioDeRecetas>()));
+	getIt.registerLazySingleton(() => PublicarReceta(getIt<RepositorioDeRecetas>()));
 	// BuscarDietas ahora necesita el repositorio de dietas y el de recetas
 	getIt.registerLazySingleton(() => BuscarDietas(getIt<RepositorioDeDietas>(), getIt<RepositorioDeRecetas>()));
 	getIt.registerLazySingleton(() => CalcularIMC(getIt<RepositorioDeRegistroIMC>()));
@@ -47,6 +50,7 @@ void setupInyector() {
 
 		// Cubits (registrar como factory para crear instancias nuevas cuando BlocProvider las pida)
 		getIt.registerFactory(() => RecetasCubit(getIt<BuscarRecetas>()));
+		getIt.registerFactory(() => PublicarRecetaCubit(getIt<PublicarReceta>()));
 		getIt.registerFactory(() => DietasCubit(getIt<BuscarDietas>()));
 		getIt.registerFactory(() => IMCCubit(getIt<CalcularIMC>()));
 			getIt.registerFactory(() => LoginCubit(getIt<BuscarUsuarios>()));
