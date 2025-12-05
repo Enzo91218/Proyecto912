@@ -20,6 +20,7 @@ class PublicarRecetaCubit extends Cubit<PublicarRecetaState> {
     required String titulo,
     required String descripcion,
     required List<Ingrediente> ingredientes,
+    required String cultura,
   }) async {
     emit(PublicarRecetaLoading());
     try {
@@ -28,6 +29,7 @@ class PublicarRecetaCubit extends Cubit<PublicarRecetaState> {
         titulo: titulo,
         descripcion: descripcion,
         ingredientes: ingredientes,
+        cultura: cultura,
       );
       emit(PublicarRecetaSuccess());
     } catch (e) {

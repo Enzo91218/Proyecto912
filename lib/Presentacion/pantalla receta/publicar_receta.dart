@@ -18,6 +18,7 @@ class _PantallaPublicarRecetaState extends State<PantallaPublicarReceta> {
   List<Ingrediente> ingredientes = [];
   final TextEditingController _ingredienteController = TextEditingController();
   final TextEditingController _cantidadController = TextEditingController();
+  String cultura = '';
 
   void _agregarIngrediente() {
     if (_ingredienteController.text.isNotEmpty && _cantidadController.text.isNotEmpty) {
@@ -72,6 +73,11 @@ class _PantallaPublicarRecetaState extends State<PantallaPublicarReceta> {
                   onChanged: (value) => descripcion = value,
                   validator: (value) => value == null || value.isEmpty ? 'Ingrese la descripción' : null,
                 ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Cultura'),
+                  onChanged: (value) => cultura = value,
+                  validator: (value) => value == null || value.isEmpty ? 'Ingrese la cultura' : null,
+                ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -113,6 +119,7 @@ class _PantallaPublicarRecetaState extends State<PantallaPublicarReceta> {
                             titulo: titulo,
                             descripcion: descripcion,
                             ingredientes: ingredientes,
+                            cultura: cultura, // <-- Agrega este argumento
                           );
                         }
                       },

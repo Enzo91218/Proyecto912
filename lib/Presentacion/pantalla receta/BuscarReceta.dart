@@ -15,6 +15,17 @@ class PantallaRecetas extends StatefulWidget {
 class _PantallaRecetasState extends State<PantallaRecetas> {
   final TextEditingController _controller = TextEditingController();
   String resultado = "";
+  String? culturaSeleccionada;
+  List<String> culturasDisponibles = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Obtener culturas únicas del repositorio
+    final recetas = context.read<RecetasCubit>().casoUso.repositorio.recetasConIngredientes([]);
+    culturasDisponibles = recetas.map((r) => r.cultura).toSet().toList();
+    culturasDisponibles.sort();
+  }
 
   void _buscarReceta() {
     final ingredientes = _controller.text
@@ -53,7 +64,35 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Text("Filtrar por cultura: "),
+                Expanded(
+                  child: DropdownButton<String>(
+                    value: culturaSeleccionada,
+                    hint: const Text("Selecciona una cultura"),
+                    isExpanded: true,
+                    items: culturasDisponibles.map((c) => DropdownMenuItem(
+                      value: c,
+                      child: Text(c),
+                    )).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        culturaSeleccionada = value;
+                      });
+                      if (value != null) {
+                        // Filtrar recetas por cultura usando el caso de uso
+                        final filtrar = context.read<RecetasCubit>().casoUso.repositorio.recetasPorCultura;
+                        final recetasFiltradas = filtrar(value);
+                        context.read<RecetasCubit>().emit(RecetasLoaded(recetasFiltradas));
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             BlocBuilder<RecetasCubit, RecetasState>(builder: (context, state) {
               if (state is RecetasLoading) {
                 return const Center(child: CircularProgressIndicator());

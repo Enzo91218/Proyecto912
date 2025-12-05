@@ -15,6 +15,7 @@ class RepositorioDeRecetasA implements RepositorioDeRecetas {
         Ingrediente(id: '3', nombre: 'Cebolla', cantidad: '1/2 unidad'),
         Ingrediente(id: '4', nombre: 'Aceite de oliva', cantidad: '1 cucharada'),
       ],
+      cultura: 'Mediterránea',
     ),
     Receta(
       id: '2',
@@ -26,6 +27,7 @@ class RepositorioDeRecetasA implements RepositorioDeRecetas {
         Ingrediente(id: '7', nombre: 'Aceite', cantidad: 'Al gusto'),
         Ingrediente(id: '8', nombre: 'Sal', cantidad: 'Al gusto'),
       ],
+      cultura: 'Española',
     ),
     Receta(
       id: '3',
@@ -36,8 +38,13 @@ class RepositorioDeRecetasA implements RepositorioDeRecetas {
         Ingrediente(id: '10', nombre: 'Zucchini', cantidad: '1 unidad'),
         Ingrediente(id: '11', nombre: 'Pechuga de pollo', cantidad: '150g'),
       ],
+      cultura: 'Internacional',
     ),
   ];
+  @override
+  List<Receta> recetasPorCultura(String cultura) {
+    return _recetas.where((r) => r.cultura.toLowerCase() == cultura.toLowerCase()).toList();
+  }
 
   @override
   List<Receta> recetasConIngredientes(List<Ingrediente> ingredientes) {

@@ -16,12 +16,14 @@ class PublicarReceta {
     required String titulo,
     required String descripcion,
     required List<Ingrediente> ingredientes,
+    required String cultura, // <-- Agrega este argumento
   }) {
     final receta = Receta(
       id: id,
       titulo: titulo,
       descripcion: descripcion,
       ingredientes: ingredientes,
+      cultura: cultura,
     );
     repositorio.agregarReceta(receta);
   }

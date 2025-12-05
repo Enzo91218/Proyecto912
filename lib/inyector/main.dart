@@ -14,6 +14,7 @@ import '../adaptadores/adaptadorderegistroIMC_en_memoria.dart';
 
 // Importar casos de uso reales
 import '../aplicacion/casos_de_uso/buscar_recetas.dart';
+import '../aplicacion/casos_de_uso/filtrar_recetas_por_cultura.dart';
 import '../aplicacion/casos_de_uso/publicar_receta.dart';
 import '../aplicacion/casos_de_uso/buscar_dietas.dart';
 import '../aplicacion/casos_de_uso/calcular_imc.dart';
@@ -41,6 +42,7 @@ void setupInyector() {
 
 	// Casos de uso reales
 	getIt.registerLazySingleton(() => BuscarRecetas(getIt<RepositorioDeRecetas>()));
+	getIt.registerLazySingleton(() => FiltrarRecetasPorCultura(getIt<RepositorioDeRecetas>()));
 	getIt.registerLazySingleton(() => PublicarReceta(getIt<RepositorioDeRecetas>()));
 	// BuscarDietas ahora necesita el repositorio de dietas y el de recetas
 	getIt.registerLazySingleton(() => BuscarDietas(getIt<RepositorioDeDietas>(), getIt<RepositorioDeRecetas>()));
