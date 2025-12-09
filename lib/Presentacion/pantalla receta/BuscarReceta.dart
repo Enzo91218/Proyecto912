@@ -123,25 +123,71 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
               return Text(resultado, style: const TextStyle(fontSize: 18));
             }),
             const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text("Volver al Menú"),
-                  onPressed: () => context.go('/'),
-                ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.monitor_weight),
-                  label: const Text("Calcular IMC"),
-                  onPressed: () => context.go('/imc'),
-                ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.add),
-                  label: const Text("Publicar Receta"),
-                  onPressed: () => context.go('/publicar-receta'),
-                ),
-              ],
+            BlocConsumer<RecetasCubit, RecetasState>(
+              listener: (context, state) {
+                if (state is RecetaAleatoriaLoaded) {
+                  final receta = state.receta;
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('Receta Aleatoria'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(receta.titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 8),
+                            Text(receta.descripcion),
+                            const SizedBox(height: 8),
+                            const Text('Ingredientes:', style: TextStyle(fontWeight: FontWeight.bold)),
+                            ...receta.ingredientes.map((i) => Text('- ${i.nombre} (${i.cantidad})')).toList(),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Cerrar'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else if (state is RecetasError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.mensaje)),
+                  );
+                }
+              },
+              builder: (context, state) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text("Volver al Menú"),
+                      onPressed: () => context.go('/'),
+                    ),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.monitor_weight),
+                      label: const Text("Calcular IMC"),
+                      onPressed: () => context.go('/imc'),
+                    ),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.add),
+                      label: const Text("Publicar Receta"),
+                      onPressed: () => context.go('/publicar-receta'),
+                    ),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.casino),
+                      label: const Text('Receta aleatoria'),
+                      onPressed: () {
+                        context.read<RecetasCubit>().mostrarAleatoria();
+                      },
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),

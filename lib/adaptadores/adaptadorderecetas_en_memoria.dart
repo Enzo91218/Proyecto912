@@ -60,4 +60,10 @@ class RepositorioDeRecetasA implements RepositorioDeRecetas {
   void agregarReceta(Receta receta) {
     _recetas.add(receta);
   }
+  @override
+  Receta? obtenerRecetaAleatoria() {
+    if (_recetas.isEmpty) return null;
+    _recetas.shuffle();
+    return _recetas.first;
+  }
 }

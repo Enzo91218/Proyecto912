@@ -7,4 +7,5 @@ abstract class RepositorioDeRecetas {
   List<Receta> recetasPorCultura(String cultura);
 
   void agregarReceta(Receta receta);
+  Receta? obtenerRecetaAleatoria();
 }

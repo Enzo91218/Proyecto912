@@ -13,6 +13,7 @@ import '../adaptadores/adaptadordeusuario_en_memoria.dart';
 import '../adaptadores/adaptadorderegistroIMC_en_memoria.dart';
 
 // Importar casos de uso reales
+import '../aplicacion/casos_de_uso/mostrar_receta_aleatoria.dart';
 import '../aplicacion/casos_de_uso/buscar_recetas.dart';
 import '../aplicacion/casos_de_uso/filtrar_recetas_por_cultura.dart';
 import '../aplicacion/casos_de_uso/publicar_receta.dart';
@@ -33,6 +34,8 @@ import '../presentacion/cubit/publicar_receta_cubit.dart';
 final getIt = GetIt.instance;
 
 void setupInyector() {
+		// Caso de uso para mostrar receta aleatoria
+		getIt.registerLazySingleton(() => MostrarRecetaAleatoria(getIt<RepositorioDeRecetas>()));
 	// Repositorios -> Adaptadores
 	getIt.registerLazySingleton<RepositorioDeRecetas>(() => RepositorioDeRecetasA());
 	getIt.registerLazySingleton<RepositorioDeDietas>(() => RepositorioDeDietasA());
