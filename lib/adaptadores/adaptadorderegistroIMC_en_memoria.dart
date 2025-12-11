@@ -3,7 +3,7 @@ import '../dominio/repositorios/repositorio_de_registroIMC.dart';
 
 class RepositorioDeRegistroIMCA implements RepositorioDeRegistroIMC {
   @override
-  List<ResultadoIMC> obtenerRegistrosIMC() {
+  Future<List<ResultadoIMC>> obtenerRegistrosIMC() async {
     // aca empiezan los ejemplos
     return [
       ResultadoIMC(imc: 16.8, categoria: 'Bajo peso'),

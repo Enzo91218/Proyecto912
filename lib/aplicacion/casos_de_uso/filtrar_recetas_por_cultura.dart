@@ -5,7 +5,7 @@ class FiltrarRecetasPorCultura {
   final RepositorioDeRecetas repositorio;
   FiltrarRecetasPorCultura(this.repositorio);
 
-  List<Receta> call(String cultura) {
+  Future<List<Receta>> call(String cultura) {
     return repositorio.recetasPorCultura(cultura);
   }
 }

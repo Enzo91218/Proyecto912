@@ -5,7 +5,7 @@ class BuscarUsuarios {
   final RepositorioDeUsuario repositorio;
   BuscarUsuarios(this.repositorio);
 
-  List<Usuario> call() {
+  Future<List<Usuario>> call() {
     return repositorio.obtenerUsuarios();
   }
 }

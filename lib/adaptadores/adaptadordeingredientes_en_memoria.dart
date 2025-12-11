@@ -3,7 +3,7 @@ import '../dominio/repositorios/repositorio_de_ingredientes.dart';
 
 class RepositorioDeIngredientesA implements RepositorioDeIngredientes {
   @override
-  List<Ingrediente> obtenerIngredientes() {
+  Future<List<Ingrediente>> obtenerIngredientes() async {
     // aca empiezan los ejemplos
     return [
       Ingrediente(id: '1', nombre: 'Tomate', cantidad: '2 unidades'),

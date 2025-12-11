@@ -8,8 +8,8 @@ class BalancePesoAlturaUC {
 
   BalancePesoAlturaUC({required this.repositorio});
 
-  BalancePesoAltura ejecutar(String usuarioId) {
-    final registros = repositorio.obtenerRegistros(usuarioId);
+  Future<BalancePesoAltura> ejecutar(String usuarioId) async {
+    final registros = await repositorio.obtenerRegistros(usuarioId);
 
     if (registros.isEmpty) {
       throw Exception('No hay registros disponibles');

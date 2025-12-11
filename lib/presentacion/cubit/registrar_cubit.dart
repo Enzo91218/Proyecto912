@@ -18,7 +18,7 @@ class RegistrarCubit extends Cubit<RegistrarState> {
   Future<void> registrar(Usuario usuario) async {
     emit(RegistrarLoading());
     try {
-      casoUso.call(usuario);
+      await casoUso.call(usuario);
       emit(RegistrarSuccess());
     } catch (e) {
       emit(RegistrarFailure(e.toString()));

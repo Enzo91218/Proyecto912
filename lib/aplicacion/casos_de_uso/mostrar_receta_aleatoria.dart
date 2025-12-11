@@ -5,7 +5,7 @@ class MostrarRecetaAleatoria {
   final RepositorioDeRecetas repositorio;
   MostrarRecetaAleatoria(this.repositorio);
 
-  Receta? call() {
+  Future<Receta?> call() {
     return repositorio.obtenerRecetaAleatoria();
   }
 }

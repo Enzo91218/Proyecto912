@@ -21,7 +21,7 @@ class DietasCubit extends Cubit<DietasState> {
   Future<void> buscar(String nombreDieta) async {
     emit(DietasLoading());
     try {
-      final recetas = casoUso.call(nombreDieta);
+      final recetas = await casoUso.call(nombreDieta);
       emit(DietasLoaded(recetas));
     } catch (e) {
       emit(DietasError(e.toString()));

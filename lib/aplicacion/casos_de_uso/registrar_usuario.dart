@@ -5,7 +5,7 @@ class RegistrarUsuario {
   final RepositorioDeUsuario repositorio;
   RegistrarUsuario(this.repositorio);
 
-  void call(Usuario usuario) {
+  Future<void> call(Usuario usuario) async {
     // Validaciones simples
     if (usuario.nombre.isEmpty) {
       throw ArgumentError('El nombre es obligatorio');
@@ -18,13 +18,14 @@ class RegistrarUsuario {
     }
 
     // email único
-    final existentes = repositorio.obtenerUsuarios();
-    final existeEmail = existentes.any((u) => u.email.toLowerCase() == usuario.email.toLowerCase());
+    final existentes = await repositorio.obtenerUsuarios();
+    final existeEmail =
+        existentes.any((u) => u.email.toLowerCase() == usuario.email.toLowerCase());
     if (existeEmail) {
       throw StateError('Ya existe un usuario con ese email');
     }
 
     // Si pasó validaciones, guardar
-    repositorio.agregarUsuario(usuario);
+    await repositorio.agregarUsuario(usuario);
   }
 }

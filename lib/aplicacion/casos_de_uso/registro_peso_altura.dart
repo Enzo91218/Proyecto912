@@ -12,7 +12,7 @@ class RegistroPesoAlturaUC {
         Random().nextInt(10000).toString();
   }
 
-  void ejecutar(String usuarioId, double peso, double altura) {
+  Future<void> ejecutar(String usuarioId, double peso, double altura) {
     final registro = RegistroPesoAltura(
       id: _generarId(),
       usuarioId: usuarioId,
@@ -20,6 +20,6 @@ class RegistroPesoAlturaUC {
       altura: altura,
       fecha: DateTime.now(),
     );
-    repositorio.agregarRegistro(registro);
+    return repositorio.agregarRegistro(registro);
   }
 }

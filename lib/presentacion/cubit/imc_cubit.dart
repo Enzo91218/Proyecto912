@@ -21,7 +21,7 @@ class IMCCubit extends Cubit<IMCState> {
   Future<void> cargar() async {
     emit(IMCLoading());
     try {
-      final regs = casoUso.call();
+      final regs = await casoUso.call();
       emit(IMCLoaded(regs));
     } catch (e) {
       emit(IMCError(e.toString()));
