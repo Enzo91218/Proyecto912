@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:get_it/get_it.dart';
+import 'dart:io';
+import '../../aplicacion/casos_de_uso/cerrar_sesion.dart';
 
 class PantallaMenu extends StatelessWidget {
   const PantallaMenu({super.key});
@@ -81,6 +84,28 @@ class PantallaMenu extends StatelessWidget {
                       onTap: () => context.go('/imc'),
                     ),
                     _MenuCardHorizontal(
+                      icon: Icons.history,
+                      text: 'Registro Peso',
+                      color: Colors.amber.shade600,
+                      onTap: () => context.go('/registro-peso'),
+                    ),
+                    _MenuCardHorizontal(
+                      icon: Icons.trending_up,
+                      text: 'Balance Peso',
+                      color: Colors.amber.shade600,
+                      onTap: () => context.go('/balance-peso'),
+                    ),
+                    _MenuCardHorizontal(
+                      icon: Icons.logout,
+                      text: 'Cerrar Sesión',
+                      color: Colors.orange,
+                      onTap: () {
+                        // Cerrar sesión y volver a login
+                        GetIt.instance.get<CerrarSesion>().cerrarSesion();
+                        context.go('/login');
+                      },
+                    ),
+                    _MenuCardHorizontal(
                       icon: Icons.calendar_month,
                       text: 'Rutinas',
                       color: Colors.amber.shade600,
@@ -90,7 +115,10 @@ class PantallaMenu extends StatelessWidget {
                       icon: Icons.exit_to_app,
                       text: 'Salir',
                       color: Colors.redAccent,
-                      onTap: () => Navigator.of(context).pop(),
+                      onTap: () {
+                        // Cierra la aplicación completamente
+                        exit(0);
+                      },
                     ),
                   ],
                 ),
@@ -116,8 +144,8 @@ class PantallaMenu extends StatelessWidget {
   }
 }
 
-// Widget para el formato horizontal y pequeño (sin cambios)
-class _MenuCardHorizontal extends StatelessWidget {
+// Widget para el formato horizontal y pequeño con animaciones
+class _MenuCardHorizontal extends StatefulWidget {
   final IconData icon;
   final String text;
   final Color color;
@@ -131,38 +159,89 @@ class _MenuCardHorizontal extends StatelessWidget {
   });
 
   @override
+  State<_MenuCardHorizontal> createState() => _MenuCardHorizontalState();
+}
+
+class _MenuCardHorizontalState extends State<_MenuCardHorizontal> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _elevationAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _elevationAnimation = Tween<double>(begin: 2, end: 8).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 100, // Ancho fijo para hacerlo más compacto
-        margin: const EdgeInsets.only(right: 12), // Espacio entre tarjetas
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: 8),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
+      onTap: () {
+        _controller.forward().then((_) {
+          _controller.reverse();
+          widget.onTap();
+        });
+      },
+      onTapDown: (_) {
+        _controller.forward();
+      },
+      onTapCancel: () {
+        _controller.reverse();
+      },
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: AnimatedBuilder(
+          animation: _elevationAnimation,
+          builder: (context, child) {
+            return Container(
+              width: 100,
+              margin: const EdgeInsets.only(right: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: Offset(0, _elevationAnimation.value),
+                  ),
+                ],
               ),
-            ),
-          ],
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(widget.icon, color: widget.color, size: 32),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.text,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

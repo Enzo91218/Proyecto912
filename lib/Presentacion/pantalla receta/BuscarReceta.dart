@@ -98,7 +98,7 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
                 return const Center(child: CircularProgressIndicator());
               } else if (state is RecetasLoaded) {
                 return Expanded(
-                  child: ListView(
+                  child: ListView.builder(
                     shrinkWrap: true,
                     children: state.recetas.map((r) => ListTile(
                       title: Text(r.titulo),

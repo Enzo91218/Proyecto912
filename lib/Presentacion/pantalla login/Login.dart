@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:io';
 
 import '../cubit/login_cubit.dart';
 
@@ -11,52 +12,119 @@ class PantallaLogin extends StatefulWidget {
   State<PantallaLogin> createState() => _PantallaLoginState();
 }
 
-class _PantallaLoginState extends State<PantallaLogin> {
+class _PantallaLoginState extends State<PantallaLogin> with SingleTickerProviderStateMixin {
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    emailCtrl.dispose();
+    passCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => context.go('/'),
+    return WillPopScope(
+      onWillPop: () async => false, // Previene el gesto de retroceso
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              // Cierra la aplicación completamente
+              exit(0);
+            },
+          ),
+          title: const Text('Iniciar sesión'),
         ),
-        title: const Text('Iniciar sesión'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            TextField(controller: emailCtrl, decoration: const InputDecoration(labelText: 'Email')),
-            const SizedBox(height: 10),
-            TextField(controller: passCtrl, decoration: const InputDecoration(labelText: 'Contraseña'), obscureText: true),
-            const SizedBox(height: 20),
-            BlocConsumer<LoginCubit, LoginState>(
-              listener: (context, state) {
-                if (state is LoginSuccess) {
-                  // al iniciar sesión volver al menú
-                  context.go('/');
-                }
-                if (state is LoginFailure) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.mensaje)));
-                }
-              },
-              builder: (context, state) {
-                if (state is LoginLoading) return const CircularProgressIndicator();
-                return ElevatedButton(
-                  onPressed: () => context.read<LoginCubit>().login(emailCtrl.text, passCtrl.text),
-                  child: const Text('Ingresar'),
-                );
-              },
+        body: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(-0.5, 0),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+                  ),
+                  child: TextField(
+                    controller: emailCtrl,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.5, 0),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+                  ),
+                  child: TextField(
+                    controller: passCtrl,
+                    decoration: InputDecoration(
+                      labelText: 'Contraseña',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    obscureText: true,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                BlocConsumer<LoginCubit, LoginState>(
+                  listener: (context, state) {
+                    if (state is LoginSuccess) {
+                      // al iniciar sesión volver al menú
+                      context.go('/');
+                    }
+                    if (state is LoginFailure) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.mensaje)));
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state is LoginLoading) return const CircularProgressIndicator();
+                    return ElevatedButton(
+                      onPressed: () => context.read<LoginCubit>().login(emailCtrl.text, passCtrl.text),
+                      child: const Text('Ingresar'),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: () => context.go('/registrar'),
+                  child: const Text('No tienes cuenta, registrar usuario', style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () => context.go('/registrar'),
-              child: const Text('No tienes cuenta, registrar usuario', style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
-            ),
-          ],
+          ),
         ),
       ),
     );

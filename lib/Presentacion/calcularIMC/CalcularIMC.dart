@@ -97,6 +97,9 @@ class _PantallaIMCState extends State<PantallaIMC> {
               onPressed: _calcularIMC,
             ),
             const SizedBox(height: 20),
+            // Mostrar el resultado calculado inmediatamente (si existe)
+            if (resultado.isNotEmpty) Text(resultado, style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 10),
             BlocBuilder<IMCCubit, IMCState>(builder: (context, state) {
               if (state is IMCLoading) {
                 return const Center(child: CircularProgressIndicator());
@@ -109,7 +112,7 @@ class _PantallaIMCState extends State<PantallaIMC> {
               } else if (state is IMCError) {
                 return Text('Error: ${state.mensaje}');
               }
-              return Text(resultado, style: const TextStyle(fontSize: 18));
+              return const SizedBox.shrink();
             }),
             const Spacer(),
             Row(
