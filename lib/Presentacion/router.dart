@@ -13,7 +13,6 @@ import 'cubit/login_cubit.dart';
 import 'cubit/publicar_receta_cubit.dart';
 import 'calcularIMC/CalcularIMC.dart';
 import 'pantalla menu/menu.dart';
-import 'pantalla receta/BuscarReceta.dart';
 import 'pantalla dieta/BuscarDieta.dart';
 import 'pantalla login/Login.dart';
 import 'pantalla registro/RegistrarUsuario.dart';
@@ -31,11 +30,6 @@ final GoRouter appRouter = GoRouter(
       path: '/',
       name: 'menu',
       builder: (context, state) => const PantallaMenu(),
-    ),
-    GoRoute(
-      path: '/buscar-receta',
-      name: 'buscar-receta',
-      builder: (context, state) => const PantallaRecetas(),
     ),
     GoRoute(
       path: '/publicar-receta',

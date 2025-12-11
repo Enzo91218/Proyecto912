@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'dart:io';
 import '../../adaptadores/adaptadorderutinas_en_memoria.dart';
 import '../../dominio/entidades/rutina.dart';
 
@@ -21,7 +23,16 @@ class _PantallaRutinasState extends State<PantallaRutinas> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Rutinas de Alimento (7 días)')),
+      appBar: AppBar(
+        title: const Text('Rutinas de Alimento (7 días)'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.exit_to_app),
+            onPressed: () => exit(0),
+            tooltip: 'Salir',
+          ),
+        ],
+      ),
       body: FutureBuilder<List<Rutina>>(
         future: _rutinasFuture,
         builder: (context, snapshot) {
