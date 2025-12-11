@@ -22,10 +22,29 @@ import 'pantalla_balance_peso/pantalla_balance_peso.dart';
 
 import 'pantalla rutina/pantalla_rutinas.dart';
 import 'pantalla receta/publicar_receta.dart';
+import 'pantalla receta/BuscarReceta.dart';
+import 'pantalla perfil/perfil.dart';
+
 final GoRouter appRouter = GoRouter(
-  // Iniciar la app directamente en el menú (login comentado)
-  initialLocation: '/',
+  // Iniciar la app en el login
+  initialLocation: '/login',
   routes: <GoRoute>[
+    GoRoute(
+      path: '/login',
+      name: 'login',
+      builder: (context, state) => BlocProvider(
+        create: (_) => inyector.getIt<LoginCubit>(),
+        child: const PantallaLogin(),
+      ),
+    ),
+    GoRoute(
+      path: '/registrar',
+      name: 'registrar',
+      builder: (context, state) => BlocProvider(
+        create: (_) => inyector.getIt<RegistrarCubit>(),
+        child: const PantallaRegistrarUsuario(),
+      ),
+    ),
     GoRoute(
       path: '/',
       name: 'menu',
@@ -34,26 +53,29 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/publicar-receta',
       name: 'publicar-receta',
-      builder: (context, state) => BlocProvider(
-        create: (_) => inyector.getIt<PublicarRecetaCubit>(),
-        child: const PantallaPublicarReceta(),
-      ),
+      builder:
+          (context, state) => BlocProvider(
+            create: (_) => inyector.getIt<PublicarRecetaCubit>(),
+            child: const PantallaPublicarReceta(),
+          ),
     ),
     GoRoute(
       path: '/recetas',
       name: 'recetas',
-      builder: (context, state) => BlocProvider(
-        create: (_) => inyector.getIt<RecetasCubit>(),
-        child: const PantallaRecetas(),
-      ),
+      builder:
+          (context, state) => BlocProvider(
+            create: (_) => inyector.getIt<RecetasCubit>(),
+            child: const PantallaRecetas(),
+          ),
     ),
     GoRoute(
       path: '/dietas',
       name: 'dietas',
-      builder: (context, state) => BlocProvider(
-        create: (_) => inyector.getIt<DietasCubit>(),
-        child: const PantallaDietas(),
-      ),
+      builder:
+          (context, state) => BlocProvider(
+            create: (_) => inyector.getIt<DietasCubit>(),
+            child: const PantallaDietas(),
+          ),
     ),
     GoRoute(
       path: '/rutinas',
@@ -61,12 +83,18 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const PantallaRutinas(),
     ),
     GoRoute(
+      path: '/perfil',
+      name: 'perfil',
+      builder: (context, state) => const PantallaPerfil(),
+    ),
+    GoRoute(
       path: '/imc',
       name: 'imc',
-      builder: (context, state) => BlocProvider(
-        create: (_) => inyector.getIt<IMCCubit>(),
-        child: const PantallaIMC(),
-      ),
+      builder:
+          (context, state) => BlocProvider(
+            create: (_) => inyector.getIt<IMCCubit>(),
+            child: const PantallaIMC(),
+          ),
     ),
     GoRoute(
       path: '/registro-peso',
@@ -75,10 +103,11 @@ final GoRouter appRouter = GoRouter(
         final usuarioActual = GetIt.instance.get<UsuarioActual>();
         final usuarioId = usuarioActual.id;
         return BlocProvider(
-          create: (_) => RegistroPesoCubit(
-            repositorio: inyector.getIt(),
-            usuarioId: usuarioId,
-          ),
+          create:
+              (_) => RegistroPesoCubit(
+                repositorio: inyector.getIt(),
+                usuarioId: usuarioId,
+              ),
           child: const PantallaRegistroPeso(),
         );
       },
@@ -90,10 +119,11 @@ final GoRouter appRouter = GoRouter(
         final usuarioActual = GetIt.instance.get<UsuarioActual>();
         final usuarioId = usuarioActual.id;
         return BlocProvider(
-          create: (_) => BalancePesoCubit(
-            casoDeUso: inyector.getIt(),
-            usuarioId: usuarioId,
-          ),
+          create:
+              (_) => BalancePesoCubit(
+                casoDeUso: inyector.getIt(),
+                usuarioId: usuarioId,
+              ),
           child: const PantallaBalancePeso(),
         );
       },

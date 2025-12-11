@@ -55,9 +55,9 @@ class PantallaLogin extends StatelessWidget {
                     context.go('/');
                   }
                   if (state is LoginFailure) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state.mensaje)),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(state.mensaje)));
                   }
                 },
                 builder: (context, state) {
@@ -70,11 +70,16 @@ class PantallaLogin extends StatelessWidget {
                       onPressed: () {
                         if (emailCtrl.text.isEmpty || passCtrl.text.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Completa todos los campos')),
+                            const SnackBar(
+                              content: Text('Completa todos los campos'),
+                            ),
                           );
                           return;
                         }
-                        context.read<LoginCubit>().login(emailCtrl.text, passCtrl.text);
+                        context.read<LoginCubit>().login(
+                          emailCtrl.text,
+                          passCtrl.text,
+                        );
                       },
                       child: const Padding(
                         padding: EdgeInsets.all(15),

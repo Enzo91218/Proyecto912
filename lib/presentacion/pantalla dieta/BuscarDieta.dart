@@ -24,8 +24,9 @@ class _PantallaDietasState extends State<PantallaDietas> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/'),
+          tooltip: 'Volver al menú',
         ),
         title: const Text("Buscar Dieta"),
       ),

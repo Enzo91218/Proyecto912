@@ -30,8 +30,9 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/'),
+          tooltip: 'Volver al menú',
         ),
         title: const Text("Buscar Receta"),
       ),

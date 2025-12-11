@@ -60,8 +60,9 @@ class _PantallaIMCState extends State<PantallaIMC> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/'),
+          tooltip: 'Volver al menú',
         ),
         title: const Text("Calcular IMC"),
       ),
@@ -114,22 +115,6 @@ class _PantallaIMCState extends State<PantallaIMC> {
               }
               return const SizedBox.shrink();
             }),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text("Volver al Menú"),
-                  onPressed: () => context.go('/'),
-                ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.search),
-                  label: const Text("Buscar Dieta"),
-                  onPressed: () => context.go('/dietas'),
-                ),
-              ],
-            ),
           ],
         ),
       ),

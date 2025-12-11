@@ -42,6 +42,7 @@ class _PantallaPublicarRecetaState extends State<PantallaPublicarReceta> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/'),
+          tooltip: 'Volver al menú',
         ),
       ),
       body: BlocListener<PublicarRecetaCubit, PublicarRecetaState>(
