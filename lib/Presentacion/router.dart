@@ -24,8 +24,8 @@ import 'pantalla_balance_peso/pantalla_balance_peso.dart';
 import 'pantalla rutina/pantalla_rutinas.dart';
 import 'pantalla receta/publicar_receta.dart';
 final GoRouter appRouter = GoRouter(
-  // Iniciar la app en la pantalla de login
-  initialLocation: '/login',
+  // Iniciar la app directamente en el menú (login comentado)
+  initialLocation: '/',
   routes: <GoRoute>[
     GoRoute(
       path: '/',
@@ -104,6 +104,8 @@ final GoRouter appRouter = GoRouter(
         );
       },
     ),
+    // RUTAS DE LOGIN Y REGISTRO COMENTADAS - La app inicia directamente en el menú
+    /*
     GoRoute(
       path: '/login',
       name: 'login',
@@ -120,5 +122,6 @@ final GoRouter appRouter = GoRouter(
         child: const PantallaRegistrarUsuario(),
       ),
     ),
+    */
   ],
 );
