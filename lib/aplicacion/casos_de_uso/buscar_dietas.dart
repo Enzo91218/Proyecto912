@@ -9,14 +9,14 @@ class BuscarDietas {
 
   BuscarDietas(this.repositorioDietas, this.repositorioRecetas);
 
-  List<Receta> call(String nombreDieta) {
-    final todasDietas = repositorioDietas.dietasConIngredientes([]);
+  Future<List<Receta>> call(String nombreDieta) async {
+    final todasDietas = await repositorioDietas.dietasConIngredientes([]);
     final dieta = todasDietas.firstWhere(
       (d) => d.nombre.toLowerCase().contains(nombreDieta.toLowerCase()),
       orElse: () => throw StateError('Dieta no encontrada'),
     );
 
-    final todasRecetas = repositorioRecetas.recetasConIngredientes([]);
+    final todasRecetas = await repositorioRecetas.recetasConIngredientes([]);
     final recetas = todasRecetas.where((r) => dieta.recetasIds.contains(r.id)).toList();
     return recetas;
   }

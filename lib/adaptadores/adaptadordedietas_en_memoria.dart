@@ -5,7 +5,7 @@ import '../dominio/repositorios/repositorio_de_dietas.dart';
 
 class RepositorioDeDietasA implements RepositorioDeDietas {
   @override
-  List<Dieta> dietasConIngredientes(List<Ingrediente> ingredientes) {
+  Future<List<Dieta>> dietasConIngredientes(List<Ingrediente> ingredientes) async {
     // aca empiezan los ejemplos
     final todas = [
       Dieta(

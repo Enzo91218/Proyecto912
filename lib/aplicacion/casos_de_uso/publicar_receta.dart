@@ -7,11 +7,11 @@ class PublicarReceta {
 
   PublicarReceta(this.repositorio);
 
-  void call(Receta receta) {
-    repositorio.agregarReceta(receta);
+  Future<void> call(Receta receta) {
+    return repositorio.agregarReceta(receta);
   }
 
-  void ejecutar({
+  Future<void> ejecutar({
     required String id,
     required String titulo,
     required String descripcion,
@@ -25,6 +25,6 @@ class PublicarReceta {
       ingredientes: ingredientes,
       cultura: cultura,
     );
-    repositorio.agregarReceta(receta);
+    return repositorio.agregarReceta(receta);
   }
 }

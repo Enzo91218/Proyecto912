@@ -6,7 +6,7 @@ class BuscarRecetas {
   final RepositorioDeRecetas repositorio;
   BuscarRecetas(this.repositorio);
 
-  List<Receta> call(List<Ingrediente> ingredientes) {
+  Future<List<Receta>> call(List<Ingrediente> ingredientes) {
     return repositorio.recetasConIngredientes(ingredientes);
   }
 }

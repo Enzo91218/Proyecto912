@@ -1,7 +1,7 @@
 import '../entidades/usuario.dart';
 
 abstract class RepositorioDeUsuario {
-  List<Usuario> obtenerUsuarios();
-  void agregarUsuario(Usuario usuario);
-  void actualizarUsuario(Usuario usuario);
+  Future<List<Usuario>> obtenerUsuarios();
+  Future<void> agregarUsuario(Usuario usuario);
+  Future<void> actualizarUsuario(Usuario usuario);
 }

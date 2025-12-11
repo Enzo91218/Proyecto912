@@ -24,7 +24,7 @@ class PublicarRecetaCubit extends Cubit<PublicarRecetaState> {
   }) async {
     emit(PublicarRecetaLoading());
     try {
-      casoUso.ejecutar(
+      await casoUso.ejecutar(
         id: id,
         titulo: titulo,
         descripcion: descripcion,

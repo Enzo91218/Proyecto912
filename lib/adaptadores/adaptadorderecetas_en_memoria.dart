@@ -42,12 +42,14 @@ class RepositorioDeRecetasA implements RepositorioDeRecetas {
     ),
   ];
   @override
-  List<Receta> recetasPorCultura(String cultura) {
-    return _recetas.where((r) => r.cultura.toLowerCase() == cultura.toLowerCase()).toList();
+  Future<List<Receta>> recetasPorCultura(String cultura) async {
+    return _recetas
+        .where((r) => r.cultura.toLowerCase() == cultura.toLowerCase())
+        .toList();
   }
 
   @override
-  List<Receta> recetasConIngredientes(List<Ingrediente> ingredientes) {
+  Future<List<Receta>> recetasConIngredientes(List<Ingrediente> ingredientes) async {
     if (ingredientes.isEmpty) return _recetas;
     final buscados = ingredientes.map((i) => i.nombre.toLowerCase()).toList();
     return _recetas.where((r) {
@@ -57,11 +59,11 @@ class RepositorioDeRecetasA implements RepositorioDeRecetas {
   }
 
   @override
-  void agregarReceta(Receta receta) {
+  Future<void> agregarReceta(Receta receta) async {
     _recetas.add(receta);
   }
   @override
-  Receta? obtenerRecetaAleatoria() {
+  Future<Receta?> obtenerRecetaAleatoria() async {
     if (_recetas.isEmpty) return null;
     _recetas.shuffle();
     return _recetas.first;

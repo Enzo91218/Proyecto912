@@ -100,14 +100,14 @@ class RepositorioDeRegistroPesoAlturaA implements RepositorioDeRegistroPesoAltur
   ];
 
   @override
-  List<RegistroPesoAltura> obtenerRegistros(String usuarioId) {
+  Future<List<RegistroPesoAltura>> obtenerRegistros(String usuarioId) async {
     return _registros
         .where((registro) => registro.usuarioId == usuarioId)
         .toList();
   }
 
   @override
-  void agregarRegistro(RegistroPesoAltura registro) {
+  Future<void> agregarRegistro(RegistroPesoAltura registro) async {
     _registros.add(registro);
   }
 }

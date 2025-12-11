@@ -10,11 +10,12 @@ import '../dominio/repositorios/repositorio_de_usuario.dart';
 import '../dominio/repositorios/repositorio_de_registroIMC.dart';
 import '../dominio/repositorios/repositorio_de_registro_peso_altura.dart';
 
-import '../adaptadores/adaptadorderecetas_en_memoria.dart';
-import '../adaptadores/adaptadordedietas_en_memoria.dart';
-import '../adaptadores/adaptadordeusuario_en_memoria.dart';
-import '../adaptadores/adaptadorderegistroIMC_en_memoria.dart';
-import '../adaptadores/adaptador_registro_peso_altura_en_memoria.dart';
+import '../adaptadores/sqlite/database_provider.dart';
+import '../adaptadores/sqlite/recetas_sqlite_adaptador.dart';
+import '../adaptadores/sqlite/dietas_sqlite_adaptador.dart';
+import '../adaptadores/sqlite/usuarios_sqlite_adaptador.dart';
+import '../adaptadores/sqlite/registros_imc_sqlite_adaptador.dart';
+import '../adaptadores/sqlite/registros_peso_altura_sqlite_adaptador.dart';
 
 // Importar casos de uso reales
 import '../aplicacion/casos_de_uso/mostrar_receta_aleatoria.dart';
@@ -42,20 +43,30 @@ import '../presentacion/cubit/publicar_receta_cubit.dart';
 final getIt = GetIt.instance;
 
 void setupInyector() {
-	// Servicio de usuario actual
-	getIt.registerSingleton<UsuarioActual>(UsuarioActual());
-	
-	// Servicio de tema
-	getIt.registerSingleton<TemaServicio>(TemaServicio());
+        // Servicio de usuario actual
+        getIt.registerSingleton<UsuarioActual>(UsuarioActual());
+
+        // Servicio de tema
+        getIt.registerSingleton<TemaServicio>(TemaServicio());
+
+        // Base de datos SQLite
+        getIt.registerSingleton<DatabaseProvider>(DatabaseProvider());
 
 		// Caso de uso para mostrar receta aleatoria
 		getIt.registerLazySingleton(() => MostrarRecetaAleatoria(getIt<RepositorioDeRecetas>()));
 	// Repositorios -> Adaptadores
-	getIt.registerLazySingleton<RepositorioDeRecetas>(() => RepositorioDeRecetasA());
-	getIt.registerLazySingleton<RepositorioDeDietas>(() => RepositorioDeDietasA());
-	getIt.registerLazySingleton<RepositorioDeUsuario>(() => RepositorioDeUsuarioA());
-	getIt.registerLazySingleton<RepositorioDeRegistroIMC>(() => RepositorioDeRegistroIMCA());
-	getIt.registerLazySingleton<RepositorioDeRegistroPesoAltura>(() => RepositorioDeRegistroPesoAlturaA());
+        getIt.registerLazySingleton<RepositorioDeRecetas>(() =>
+            RepositorioDeRecetasSqlite(getIt<DatabaseProvider>()));
+        getIt.registerLazySingleton<RepositorioDeDietas>(() =>
+            RepositorioDeDietasSqlite(
+                getIt<DatabaseProvider>(),
+                getIt<RepositorioDeRecetas>() as RepositorioDeRecetasSqlite));
+        getIt.registerLazySingleton<RepositorioDeUsuario>(
+            () => RepositorioDeUsuarioSqlite(getIt<DatabaseProvider>()));
+        getIt.registerLazySingleton<RepositorioDeRegistroIMC>(() =>
+            RepositorioDeRegistroIMCSqlite(getIt<DatabaseProvider>()));
+        getIt.registerLazySingleton<RepositorioDeRegistroPesoAltura>(() =>
+            RepositorioDeRegistroPesoAlturaSqlite(getIt<DatabaseProvider>()));
 
 
 	// Casos de uso reales
@@ -81,8 +92,9 @@ void setupInyector() {
 }
 
 void main() {
-	setupInyector();
-	runApp(const MyApp());
+        WidgetsFlutterBinding.ensureInitialized();
+        setupInyector();
+        runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

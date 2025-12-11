@@ -6,8 +6,8 @@ class ActualizarPesoAltura {
 
   ActualizarPesoAltura({required this.repositorio});
 
-  void ejecutar(String usuarioId, double nuevoPeso, double nuevaAltura) {
-    final usuarios = repositorio.obtenerUsuarios();
+  Future<void> ejecutar(String usuarioId, double nuevoPeso, double nuevaAltura) async {
+    final usuarios = await repositorio.obtenerUsuarios();
     final usuario = usuarios.firstWhere((u) => u.id == usuarioId);
     
     final usuarioActualizado = Usuario(
@@ -20,6 +20,6 @@ class ActualizarPesoAltura {
       altura: nuevaAltura,
     );
     
-    repositorio.actualizarUsuario(usuarioActualizado);
+    await repositorio.actualizarUsuario(usuarioActualizado);
   }
 }

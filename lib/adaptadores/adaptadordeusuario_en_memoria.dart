@@ -42,15 +42,17 @@ class RepositorioDeUsuarioA implements RepositorioDeUsuario {
   ];
 
   @override
-  List<Usuario> obtenerUsuarios() => List.unmodifiable(_usuarios);
+  @override
+  Future<List<Usuario>> obtenerUsuarios() async => List.unmodifiable(_usuarios);
 
   @override
-  void agregarUsuario(Usuario usuario) {
+  @override
+  Future<void> agregarUsuario(Usuario usuario) async {
     _usuarios.add(usuario);
   }
 
   @override
-  void actualizarUsuario(Usuario usuario) {
+  Future<void> actualizarUsuario(Usuario usuario) async {
     final index = _usuarios.indexWhere((u) => u.id == usuario.id);
     if (index != -1) {
       _usuarios[index] = usuario;

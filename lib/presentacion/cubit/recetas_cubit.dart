@@ -27,7 +27,7 @@ class RecetasCubit extends Cubit<RecetasState> {
   Future<void> buscar(List<Ingrediente> ingredientes) async {
     emit(RecetasLoading());
     try {
-      final recetas = casoUso.call(ingredientes);
+      final recetas = await casoUso.call(ingredientes);
       if (recetas.isEmpty) {
         emit(RecetasError('No se encontraron recetas para los ingredientes proporcionados'));
         return;
@@ -38,8 +38,8 @@ class RecetasCubit extends Cubit<RecetasState> {
     }
   }
 
-  void mostrarAleatoria() {
-    final receta = casoUso.repositorio.obtenerRecetaAleatoria();
+  Future<void> mostrarAleatoria() async {
+    final receta = await casoUso.repositorio.obtenerRecetaAleatoria();
     if (receta != null) {
       emit(RecetaAleatoriaLoaded(receta));
     } else {

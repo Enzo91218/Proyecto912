@@ -23,7 +23,7 @@ class LoginCubit extends Cubit<LoginState> {
   Future<void> login(String email, String password) async {
     emit(LoginLoading());
     try {
-      final usuarios = casoUso.call();
+      final usuarios = await casoUso.call();
       final encontrado = usuarios.firstWhere(
         (u) => u.email.toLowerCase() == email.toLowerCase() && u.password == password,
         orElse: () => throw StateError('Credenciales inválidas'),
