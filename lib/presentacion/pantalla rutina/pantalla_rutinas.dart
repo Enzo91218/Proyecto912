@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../adaptadores/adaptadorderutinas_en_memoria.dart';
+import 'package:get_it/get_it.dart';
+import '../../dominio/repositorios/repositorio_de_rutinas.dart';
 import '../../dominio/entidades/rutina.dart';
 
 class PantallaRutinas extends StatefulWidget {
@@ -19,7 +20,8 @@ class _PantallaRutinasState extends State<PantallaRutinas>
   @override
   void initState() {
     super.initState();
-    _rutinasFuture = AdaptadorDeRutinasEnMemoria().obtenerRutinas();
+    final repositorio = GetIt.instance.get<RepositorioDeRutinas>();
+    _rutinasFuture = repositorio.obtenerRutinas();
     _ejerciciosCompletados = {};
   }
 
@@ -51,30 +53,23 @@ class _PantallaRutinasState extends State<PantallaRutinas>
           return CustomScrollView(
             slivers: [
               // Indicador de progreso semanal
-              SliverToBoxAdapter(
-                child: _buildProgressHeader(isDark),
-              ),
+              SliverToBoxAdapter(child: _buildProgressHeader(isDark)),
               // Gráfico de actividad
-              SliverToBoxAdapter(
-                child: _buildActivityChart(isDark),
-              ),
+              SliverToBoxAdapter(child: _buildActivityChart(isDark)),
               // Selector de días
-              SliverToBoxAdapter(
-                child: _buildDaySelector(isDark),
-              ),
+              SliverToBoxAdapter(child: _buildDaySelector(isDark)),
               // Rutinas
               SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final rutina = rutinas[index];
-                    if (!_ejerciciosCompletados.containsKey(rutina.id)) {
-                      _ejerciciosCompletados[rutina.id] =
-                          List.filled(rutina.ejercicios.length, false);
-                    }
-                    return _buildRutinaCard(context, rutina, isDark);
-                  },
-                  childCount: rutinas.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final rutina = rutinas[index];
+                  if (!_ejerciciosCompletados.containsKey(rutina.id)) {
+                    _ejerciciosCompletados[rutina.id] = List.filled(
+                      rutina.ejercicios.length,
+                      false,
+                    );
+                  }
+                  return _buildRutinaCard(context, rutina, isDark);
+                }, childCount: rutinas.length),
               ),
             ],
           );
@@ -84,10 +79,14 @@ class _PantallaRutinasState extends State<PantallaRutinas>
   }
 
   Widget _buildProgressHeader(bool isDark) {
-    final completados = _ejerciciosCompletados.values
-        .fold<int>(0, (sum, list) => sum + (list.where((e) => e).length));
-    final total = _ejerciciosCompletados.values
-        .fold<int>(0, (sum, list) => sum + list.length);
+    final completados = _ejerciciosCompletados.values.fold<int>(
+      0,
+      (sum, list) => sum + (list.where((e) => e).length),
+    );
+    final total = _ejerciciosCompletados.values.fold<int>(
+      0,
+      (sum, list) => sum + list.length,
+    );
     final porcentaje = total > 0 ? (completados / total * 100).toInt() : 0;
 
     return Container(
@@ -95,10 +94,7 @@ class _PantallaRutinasState extends State<PantallaRutinas>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.deepOrange.shade400,
-            Colors.orange.shade400,
-          ],
+          colors: [Colors.deepOrange.shade400, Colors.orange.shade400],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -152,10 +148,7 @@ class _PantallaRutinasState extends State<PantallaRutinas>
                       ),
                       const Text(
                         'Completado',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 11),
                       ),
                     ],
                   ),
@@ -196,10 +189,7 @@ class _PantallaRutinasState extends State<PantallaRutinas>
         children: [
           const Text(
             'Actividad de la Semana',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -218,9 +208,10 @@ class _PantallaRutinasState extends State<PantallaRutinas>
                       width: 35,
                       height: altura,
                       decoration: BoxDecoration(
-                        color: isToday
-                            ? Colors.deepOrange.shade400
-                            : Colors.blue.shade300,
+                        color:
+                            isToday
+                                ? Colors.deepOrange.shade400
+                                : Colors.blue.shade300,
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
@@ -228,7 +219,8 @@ class _PantallaRutinasState extends State<PantallaRutinas>
                     Text(
                       dias[index],
                       style: TextStyle(
-                        fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                        fontWeight:
+                            isToday ? FontWeight.bold : FontWeight.normal,
                         fontSize: 13,
                       ),
                     ),
@@ -243,7 +235,15 @@ class _PantallaRutinasState extends State<PantallaRutinas>
   }
 
   Widget _buildDaySelector(bool isDark) {
-    final dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    final dias = [
+      'Lunes',
+      'Martes',
+      'Miércoles',
+      'Jueves',
+      'Viernes',
+      'Sábado',
+      'Domingo',
+    ];
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
@@ -251,10 +251,7 @@ class _PantallaRutinasState extends State<PantallaRutinas>
         children: [
           const Text(
             'Selecciona el Día',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 10),
           SizedBox(
@@ -277,14 +274,15 @@ class _PantallaRutinasState extends State<PantallaRutinas>
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        gradient: isSelected
-                            ? LinearGradient(
-                                colors: [
-                                  Colors.blue.shade400,
-                                  Colors.blue.shade600,
-                                ],
-                              )
-                            : null,
+                        gradient:
+                            isSelected
+                                ? LinearGradient(
+                                  colors: [
+                                    Colors.blue.shade400,
+                                    Colors.blue.shade600,
+                                  ],
+                                )
+                                : null,
                         color: isSelected ? null : Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -293,9 +291,8 @@ class _PantallaRutinasState extends State<PantallaRutinas>
                           dias[index].substring(0, 3),
                           style: TextStyle(
                             color: isSelected ? Colors.white : Colors.black87,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.w500,
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.w500,
                           ),
                         ),
                       ),
@@ -310,11 +307,7 @@ class _PantallaRutinasState extends State<PantallaRutinas>
     );
   }
 
-  Widget _buildRutinaCard(
-    BuildContext context,
-    Rutina rutina,
-    bool isDark,
-  ) {
+  Widget _buildRutinaCard(BuildContext context, Rutina rutina, bool isDark) {
     final ejercicios = rutina.ejercicios;
     final completados = _ejerciciosCompletados[rutina.id] ?? [];
 
@@ -439,14 +432,10 @@ class _PantallaRutinasState extends State<PantallaRutinas>
           duration: const Duration(milliseconds: 300),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: completado
-                ? Colors.green.shade50
-                : Colors.grey.shade100,
+            color: completado ? Colors.green.shade50 : Colors.grey.shade100,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: completado
-                  ? Colors.green.shade300
-                  : Colors.grey.shade300,
+              color: completado ? Colors.green.shade300 : Colors.grey.shade300,
               width: completado ? 2 : 1,
             ),
           ),
@@ -456,9 +445,8 @@ class _PantallaRutinasState extends State<PantallaRutinas>
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: completado
-                      ? Colors.green.shade400
-                      : Colors.blue.shade300,
+                  color:
+                      completado ? Colors.green.shade400 : Colors.blue.shade300,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
@@ -489,11 +477,7 @@ class _PantallaRutinasState extends State<PantallaRutinas>
                     color: Colors.green.shade400,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 16,
-                  ),
+                  child: const Icon(Icons.check, color: Colors.white, size: 16),
                 ),
             ],
           ),

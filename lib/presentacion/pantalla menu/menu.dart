@@ -5,7 +5,6 @@ import 'dart:io';
 import '../../aplicacion/casos_de_uso/cerrar_sesion.dart';
 import '../../servicios/usuario_actual.dart';
 import '../../servicios/tema_servicio.dart';
-import '../../dominio/repositorios/repositorio_de_recetas.dart';
 
 class PantallaMenu extends StatefulWidget {
   const PantallaMenu({super.key});
@@ -23,21 +22,9 @@ class _PantallaMenuState extends State<PantallaMenu> {
       icon: Icons.home,
       route: null, // Stay on home
     ),
-    _NavItem(
-      label: 'Recetas',
-      icon: Icons.restaurant_menu,
-      route: '/recetas',
-    ),
-    _NavItem(
-      label: 'Dietas',
-      icon: Icons.local_dining,
-      route: '/dietas',
-    ),
-    _NavItem(
-      label: 'Rutinas',
-      icon: Icons.calendar_month,
-      route: '/rutinas',
-    ),
+    _NavItem(label: 'Recetas', icon: Icons.restaurant_menu, route: '/recetas'),
+    _NavItem(label: 'Dietas', icon: Icons.local_dining, route: '/dietas'),
+    _NavItem(label: 'Rutinas', icon: Icons.calendar_month, route: '/rutinas'),
     _NavItem(
       label: 'Más',
       icon: Icons.more_horiz,
@@ -68,98 +55,130 @@ class _PantallaMenuState extends State<PantallaMenu> {
 
   void _showMoreOptions() {
     final temaServicio = GetIt.instance.get<TemaServicio>();
-    
+    final usuarioActual = GetIt.instance.get<UsuarioActual>();
+    final usuario = usuarioActual.usuario;
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Más opciones',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      builder:
+          (context) => SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Más opciones',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  _OptionButton(
+                    icon: Icons.person_outline,
+                    label: 'Mi Perfil',
+                    color: Colors.blue,
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/perfil');
+                    },
+                  ),
+                  const Divider(height: 24),
+                  _OptionButton(
+                    icon: Icons.add,
+                    label: 'Publicar Receta',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/publicar-receta');
+                    },
+                  ),
+                  _OptionButton(
+                    icon: Icons.monitor_weight,
+                    label: 'IMC',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/imc');
+                    },
+                  ),
+                  _OptionButton(
+                    icon: Icons.history,
+                    label: 'Registro de Peso',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/registro-peso');
+                    },
+                  ),
+                  _OptionButton(
+                    icon: Icons.trending_up,
+                    label: 'Balance de Peso',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/balance-peso');
+                    },
+                  ),
+                  const Divider(height: 24),
+                  ListenableBuilder(
+                    listenable: temaServicio,
+                    builder:
+                        (context, _) => _OptionButton(
+                          icon:
+                              temaServicio.modoOscuro
+                                  ? Icons.light_mode
+                                  : Icons.dark_mode,
+                          label:
+                              temaServicio.modoOscuro
+                                  ? 'Modo Claro'
+                                  : 'Modo Oscuro',
+                          color: Colors.purple,
+                          onTap: () {
+                            temaServicio.toggleTema();
+                            Navigator.pop(context);
+                          },
+                        ),
+                  ),
+                  _OptionButton(
+                    icon: Icons.settings,
+                    label: 'Herramientas',
+                    color: Colors.green,
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/herramientas');
+                    },
+                  ),
+                  // Opción Debug solo para administrador (u1)
+                  if (usuario?.id == 'u1') ...[
+                    _OptionButton(
+                      icon: Icons.bug_report,
+                      label: 'Debug BD',
+                      color: Colors.deepOrange,
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.go('/debug-bd');
+                      },
+                    ),
+                  ],
+                  const Divider(height: 24),
+                  _OptionButton(
+                    icon: Icons.logout,
+                    label: 'Cerrar Sesión',
+                    color: Colors.orange,
+                    onTap: () {
+                      Navigator.pop(context);
+                      GetIt.instance.get<CerrarSesion>().cerrarSesion();
+                      context.go('/login');
+                    },
+                  ),
+                  _OptionButton(
+                    icon: Icons.exit_to_app,
+                    label: 'Salir',
+                    color: Colors.red,
+                    onTap: () => exit(0),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              _OptionButton(
-                icon: Icons.person_outline,
-                label: 'Mi Perfil',
-                color: Colors.blue,
-                onTap: () {
-                  Navigator.pop(context);
-                  context.go('/perfil');
-                },
-              ),
-              const Divider(height: 24),
-              _OptionButton(
-                icon: Icons.add,
-                label: 'Publicar Receta',
-                onTap: () {
-                  Navigator.pop(context);
-                  context.go('/publicar-receta');
-                },
-              ),
-              _OptionButton(
-                icon: Icons.monitor_weight,
-                label: 'IMC',
-                onTap: () {
-                  Navigator.pop(context);
-                  context.go('/imc');
-                },
-              ),
-              _OptionButton(
-                icon: Icons.history,
-                label: 'Registro de Peso',
-                onTap: () {
-                  Navigator.pop(context);
-                  context.go('/registro-peso');
-                },
-              ),
-              _OptionButton(
-                icon: Icons.trending_up,
-                label: 'Balance de Peso',
-                onTap: () {
-                  Navigator.pop(context);
-                  context.go('/balance-peso');
-                },
-              ),
-              const Divider(height: 24),
-              ListenableBuilder(
-                listenable: temaServicio,
-                builder: (context, _) => _OptionButton(
-                  icon: temaServicio.modoOscuro ? Icons.light_mode : Icons.dark_mode,
-                  label: temaServicio.modoOscuro ? 'Modo Claro' : 'Modo Oscuro',
-                  color: Colors.purple,
-                  onTap: () {
-                    temaServicio.toggleTema();
-                    Navigator.pop(context);
-                  },
-                ),
-              ),
-              _OptionButton(
-                icon: Icons.logout,
-                label: 'Cerrar Sesión',
-                color: Colors.orange,
-                onTap: () {
-                  Navigator.pop(context);
-                  GetIt.instance.get<CerrarSesion>().cerrarSesion();
-                  context.go('/login');
-                },
-              ),
-              _OptionButton(
-                icon: Icons.exit_to_app,
-                label: 'Salir',
-                color: Colors.red,
-                onTap: () => exit(0),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -167,11 +186,6 @@ class _PantallaMenuState extends State<PantallaMenu> {
   Widget build(BuildContext context) {
     final usuarioActual = GetIt.instance.get<UsuarioActual>();
     final usuario = usuarioActual.usuario;
-    
-    // Obtener recetas disponibles
-    final repositorioRecetas = GetIt.instance.get<RepositorioDeRecetas>();
-    final todasRecetas = repositorioRecetas.recetasConIngredientes([]);
-    final recetasCount = todasRecetas.length;
 
     return Scaffold(
       body: CustomScrollView(
@@ -248,7 +262,8 @@ class _PantallaMenuState extends State<PantallaMenu> {
                       _StatCard(
                         icon: Icons.height,
                         label: 'Altura',
-                        value: '${usuario?.altura.toStringAsFixed(2) ?? '--'} m',
+                        value:
+                            '${usuario?.altura.toStringAsFixed(2) ?? '--'} m',
                         color: Colors.green,
                       ),
                       _StatCard(
@@ -260,7 +275,7 @@ class _PantallaMenuState extends State<PantallaMenu> {
                       _StatCard(
                         icon: Icons.restaurant_menu,
                         label: 'Recetas Disponibles',
-                        value: '$recetasCount',
+                        value: '--',
                         color: Colors.purple,
                       ),
                     ],
@@ -310,11 +325,7 @@ class _NavItem {
   final IconData icon;
   final String? route;
 
-  _NavItem({
-    required this.label,
-    required this.icon,
-    required this.route,
-  });
+  _NavItem({required this.label, required this.icon, required this.route});
 }
 
 class _StatCard extends StatefulWidget {
@@ -334,7 +345,8 @@ class _StatCard extends StatefulWidget {
   State<_StatCard> createState() => _StatCardState();
 }
 
-class _StatCardState extends State<_StatCard> with SingleTickerProviderStateMixin {
+class _StatCardState extends State<_StatCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -345,9 +357,10 @@ class _StatCardState extends State<_StatCard> with SingleTickerProviderStateMixi
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
     _controller.forward();
   }
 
@@ -400,10 +413,7 @@ class _StatCardState extends State<_StatCard> with SingleTickerProviderStateMixi
               Text(
                 widget.label,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
             ],
           ),
@@ -428,9 +438,9 @@ class _ActionButton extends StatefulWidget {
   State<_ActionButton> createState() => _ActionButtonState();
 }
 
-class _ActionButtonState extends State<_ActionButton> with SingleTickerProviderStateMixin {
+class _ActionButtonState extends State<_ActionButton>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _slideAnimation;
   bool _isHovered = false;
 
   @override
@@ -439,9 +449,6 @@ class _ActionButtonState extends State<_ActionButton> with SingleTickerProviderS
     _controller = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
-    );
-    _slideAnimation = Tween<double>(begin: -50, end: 0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     _controller.forward();
   }
@@ -455,7 +462,10 @@ class _ActionButtonState extends State<_ActionButton> with SingleTickerProviderS
   @override
   Widget build(BuildContext context) {
     return SlideTransition(
-      position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(
+      position: Tween<Offset>(
+        begin: const Offset(-1, 0),
+        end: Offset.zero,
+      ).animate(
         CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
       ),
       child: MouseRegion(
@@ -472,10 +482,7 @@ class _ActionButtonState extends State<_ActionButton> with SingleTickerProviderS
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    Colors.blue.shade400,
-                    Colors.blue.shade600,
-                  ],
+                  colors: [Colors.blue.shade400, Colors.blue.shade600],
                 ),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [

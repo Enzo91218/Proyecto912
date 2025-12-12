@@ -9,13 +9,17 @@ class PantallaRegistrarUsuario extends StatefulWidget {
   const PantallaRegistrarUsuario({super.key});
 
   @override
-  State<PantallaRegistrarUsuario> createState() => _PantallaRegistrarUsuarioState();
+  State<PantallaRegistrarUsuario> createState() =>
+      _PantallaRegistrarUsuarioState();
 }
 
 class _PantallaRegistrarUsuarioState extends State<PantallaRegistrarUsuario> {
   final nombreCtrl = TextEditingController();
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
+  final edadCtrl = TextEditingController();
+  final pesoCtrl = TextEditingController();
+  final alturaCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -29,41 +33,104 @@ class _PantallaRegistrarUsuarioState extends State<PantallaRegistrarUsuario> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            TextField(controller: nombreCtrl, decoration: const InputDecoration(labelText: 'Nombre')),
-            const SizedBox(height: 10),
-            TextField(controller: emailCtrl, decoration: const InputDecoration(labelText: 'Email')),
-            const SizedBox(height: 10),
-            TextField(controller: passCtrl, decoration: const InputDecoration(labelText: 'Contraseña'), obscureText: true),
-            const SizedBox(height: 20),
-            BlocConsumer<RegistrarCubit, RegistrarState>(
-              listener: (context, state) {
-                if (state is RegistrarSuccess) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Usuario registrado')));
-                  context.go('/');
-                }
-                if (state is RegistrarFailure) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.mensaje)));
-                }
-              },
-              builder: (context, state) {
-                if (state is RegistrarLoading) return const CircularProgressIndicator();
-                return ElevatedButton(
-                  onPressed: () => context.read<RegistrarCubit>().registrar(Usuario(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    nombre: nombreCtrl.text,
-                    email: emailCtrl.text,
-                    password: passCtrl.text,
-                    edad: 18,
-                    peso: 60.0,
-                    altura: 1.7,
-                  )),
-                  child: const Text('Registrar'),
-                );
-              },
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(
+                controller: nombreCtrl,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: emailCtrl,
+                decoration: const InputDecoration(labelText: 'Email'),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: passCtrl,
+                decoration: const InputDecoration(labelText: 'Contraseña'),
+                obscureText: true,
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: edadCtrl,
+                decoration: const InputDecoration(labelText: 'Edad'),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: pesoCtrl,
+                decoration: const InputDecoration(labelText: 'Peso (kg)'),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: alturaCtrl,
+                decoration: const InputDecoration(labelText: 'Altura (m)'),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 20),
+              BlocConsumer<RegistrarCubit, RegistrarState>(
+                listener: (context, state) {
+                  if (state is RegistrarSuccess) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Usuario registrado')),
+                    );
+                    context.go('/login');
+                  }
+                  if (state is RegistrarFailure) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(state.mensaje)));
+                  }
+                },
+                builder: (context, state) {
+                  if (state is RegistrarLoading)
+                    return const CircularProgressIndicator();
+                  return SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (nombreCtrl.text.isEmpty ||
+                            emailCtrl.text.isEmpty ||
+                            passCtrl.text.isEmpty ||
+                            edadCtrl.text.isEmpty ||
+                            pesoCtrl.text.isEmpty ||
+                            alturaCtrl.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Completa todos los campos'),
+                            ),
+                          );
+                          return;
+                        }
+                        context.read<RegistrarCubit>().registrar(
+                          Usuario(
+                            id:
+                                DateTime.now().millisecondsSinceEpoch
+                                    .toString(),
+                            nombre: nombreCtrl.text,
+                            email: emailCtrl.text,
+                            password: passCtrl.text,
+                            edad: int.parse(edadCtrl.text),
+                            peso: double.parse(pesoCtrl.text),
+                            altura: double.parse(alturaCtrl.text),
+                          ),
+                        );
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.all(15),
+                        child: Text(
+                          'Registrar',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -8,13 +8,11 @@ class RegistroPesoCubit extends Cubit<RegistroPesoState> {
   final RepositorioDeRegistroPesoAltura repositorio;
   final String usuarioId;
 
-  RegistroPesoCubit({
-    required this.repositorio,
-    required this.usuarioId,
-  }) : super(RegistroPesoInicial());
+  RegistroPesoCubit({required this.repositorio, required this.usuarioId})
+    : super(RegistroPesoInicial());
 
-  void cargar() {
-    final registros = repositorio.obtenerRegistros(usuarioId);
+  Future<void> cargar() async {
+    final registros = await repositorio.obtenerRegistros(usuarioId);
     emit(RegistroPesoCargado(registros: registros));
   }
 }

@@ -8,14 +8,12 @@ class BalancePesoCubit extends Cubit<BalancePesoState> {
   final BalancePesoAlturaUC casoDeUso;
   final String usuarioId;
 
-  BalancePesoCubit({
-    required this.casoDeUso,
-    required this.usuarioId,
-  }) : super(BalancePesoInicial());
+  BalancePesoCubit({required this.casoDeUso, required this.usuarioId})
+    : super(BalancePesoInicial());
 
-  void cargar() {
+  Future<void> cargar() async {
     try {
-      final balance = casoDeUso.ejecutar(usuarioId);
+      final balance = await casoDeUso.ejecutar(usuarioId);
       emit(BalancePesoCargado(balance: balance));
     } catch (e) {
       emit(BalancePesoError(mensaje: e.toString()));
@@ -25,20 +23,24 @@ class BalancePesoCubit extends Cubit<BalancePesoState> {
   void seleccionarPunto(int index) {
     final currentState = state;
     if (currentState is BalancePesoCargado) {
-      emit(BalancePesoCargado(
-        balance: currentState.balance,
-        puntoSeleccionado: index,
-      ));
+      emit(
+        BalancePesoCargado(
+          balance: currentState.balance,
+          puntoSeleccionado: index,
+        ),
+      );
     }
   }
 
   void deseleccionarPunto() {
     final currentState = state;
     if (currentState is BalancePesoCargado) {
-      emit(BalancePesoCargado(
-        balance: currentState.balance,
-        puntoSeleccionado: null,
-      ));
+      emit(
+        BalancePesoCargado(
+          balance: currentState.balance,
+          puntoSeleccionado: null,
+        ),
+      );
     }
   }
 }

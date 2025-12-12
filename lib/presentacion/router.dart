@@ -19,6 +19,8 @@ import 'pantalla registro/RegistrarUsuario.dart';
 import 'cubit/registrar_cubit.dart';
 import 'pantalla_registro_peso/pantalla_registro_peso.dart';
 import 'pantalla_balance_peso/pantalla_balance_peso.dart';
+import 'pantalla_herramientas/pantalla_herramientas.dart';
+import 'pantalla_debug_bd/pantalla_debug_bd.dart';
 
 import 'pantalla rutina/pantalla_rutinas.dart';
 import 'pantalla receta/publicar_receta.dart';
@@ -32,18 +34,25 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/login',
       name: 'login',
-      builder: (context, state) => BlocProvider(
-        create: (_) => inyector.getIt<LoginCubit>(),
-        child: const PantallaLogin(),
-      ),
+      builder:
+          (context, state) => BlocProvider(
+            create: (_) => inyector.getIt<LoginCubit>(),
+            child: const PantallaLogin(),
+          ),
     ),
     GoRoute(
       path: '/registrar',
       name: 'registrar',
-      builder: (context, state) => BlocProvider(
-        create: (_) => inyector.getIt<RegistrarCubit>(),
-        child: const PantallaRegistrarUsuario(),
-      ),
+      builder:
+          (context, state) => BlocProvider(
+            create: (_) => inyector.getIt<RegistrarCubit>(),
+            child: const PantallaRegistrarUsuario(),
+          ),
+    ),
+    GoRoute(
+      path: '/debug-bd',
+      name: 'debug-bd',
+      builder: (context, state) => const PantallaDebugBD(),
     ),
     GoRoute(
       path: '/',
@@ -127,6 +136,11 @@ final GoRouter appRouter = GoRouter(
           child: const PantallaBalancePeso(),
         );
       },
+    ),
+    GoRoute(
+      path: '/herramientas',
+      name: 'herramientas',
+      builder: (context, state) => const PantallaHerramientas(),
     ),
     // RUTAS DE LOGIN Y REGISTRO COMENTADAS - La app inicia directamente en el menú
     /*
