@@ -1,16 +1,29 @@
+class Alimento {
+  final int dia;
+  final String horario;
+  final String alimento;
+  final String cantidad;
+
+  Alimento({
+    required this.dia,
+    required this.horario,
+    required this.alimento,
+    required this.cantidad,
+  });
+}
 
 class Rutina {
   final String id;
   final String nombre;
   final String descripcion;
-  final List<String> ejercicios;
+  final List<Alimento> alimentos;
   final bool favorito;
 
   Rutina({
     required this.id,
     required this.nombre,
     required this.descripcion,
-    required this.ejercicios,
+    required this.alimentos,
     this.favorito = false,
   });
 }

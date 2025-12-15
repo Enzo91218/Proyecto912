@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:get_it/get_it.dart';
-import '../../dominio/repositorios/repositorio_de_rutinas.dart';
 import '../../dominio/entidades/rutina.dart';
+import '../cubit/rutinas_cubit.dart';
 
 class PantallaRutinas extends StatefulWidget {
   const PantallaRutinas({Key? key}) : super(key: key);
@@ -11,474 +11,250 @@ class PantallaRutinas extends StatefulWidget {
   State<PantallaRutinas> createState() => _PantallaRutinasState();
 }
 
-class _PantallaRutinasState extends State<PantallaRutinas>
-    with TickerProviderStateMixin {
-  late Future<List<Rutina>> _rutinasFuture;
-  late Map<String, List<bool>> _ejerciciosCompletados;
-  int _diaActual = 0;
+class _PantallaRutinasState extends State<PantallaRutinas> {
+  final Map<String, Map<int, bool>> _diasCompletados = {};
 
   @override
   void initState() {
     super.initState();
-    final repositorio = GetIt.instance.get<RepositorioDeRutinas>();
-    _rutinasFuture = repositorio.obtenerRutinas();
-    _ejerciciosCompletados = {};
+    print('🖥️ PantallaRutinas: initState llamado');
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    print('🎨 PantallaRutinas: build llamado');
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mi Rutina Semanal'),
+        title: const Text('Rutinas Alimenticias'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/'),
-          tooltip: 'Volver al menú',
         ),
-        elevation: 0,
         centerTitle: true,
       ),
-      body: FutureBuilder<List<Rutina>>(
-        future: _rutinasFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: BlocBuilder<RutinasCubit, RutinasState>(
+        builder: (context, state) {
+          print('🔄 PantallaRutinas: BlocBuilder llamado - Estado: ${state.runtimeType}');
+          if (state is RutinasLoading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No hay rutinas disponibles.'));
-          }
-          final rutinas = snapshot.data!;
-          return CustomScrollView(
-            slivers: [
-              // Indicador de progreso semanal
-              SliverToBoxAdapter(child: _buildProgressHeader(isDark)),
-              // Gráfico de actividad
-              SliverToBoxAdapter(child: _buildActivityChart(isDark)),
-              // Selector de días
-              SliverToBoxAdapter(child: _buildDaySelector(isDark)),
-              // Rutinas
-              SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final rutina = rutinas[index];
-                  if (!_ejerciciosCompletados.containsKey(rutina.id)) {
-                    _ejerciciosCompletados[rutina.id] = List.filled(
-                      rutina.ejercicios.length,
-                      false,
-                    );
-                  }
-                  return _buildRutinaCard(context, rutina, isDark);
-                }, childCount: rutinas.length),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
+          } else if (state is RutinasLoaded) {
+            final rutinas = state.rutinas;
+            
+            if (rutinas.isEmpty) {
+              return const Center(
+                child: Text('No hay rutinas alimenticias disponibles'),
+              );
+            }
 
-  Widget _buildProgressHeader(bool isDark) {
-    final completados = _ejerciciosCompletados.values.fold<int>(
-      0,
-      (sum, list) => sum + (list.where((e) => e).length),
-    );
-    final total = _ejerciciosCompletados.values.fold<int>(
-      0,
-      (sum, list) => sum + list.length,
-    );
-    final porcentaje = total > 0 ? (completados / total * 100).toInt() : 0;
+            for (var rutina in rutinas) {
+              if (!_diasCompletados.containsKey(rutina.id)) {
+                _diasCompletados[rutina.id] = {};
+                for (int dia = 1; dia <= 7; dia++) {
+                  _diasCompletados[rutina.id]![dia] = false;
+                }
+              }
+            }
 
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.deepOrange.shade400, Colors.orange.shade400],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: rutinas.length,
+              itemBuilder: (context, index) {
+                final rutina = rutinas[index];
+                return _buildRutinaCard(rutina);
+              },
+            );
+          } else if (state is RutinasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Progreso Semanal',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
                   Text(
-                    '$completados/$total ejercicios completados',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                      fontSize: 14,
-                    ),
+                    state.mensaje,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => context.read<RutinasCubit>().cargar(),
+                    child: const Text('Reintentar'),
                   ),
                 ],
               ),
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.2),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '$porcentaje%',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Text(
-                        'Completado',
-                        style: TextStyle(color: Colors.white, fontSize: 11),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: LinearProgressIndicator(
-              value: total > 0 ? completados / total : 0,
-              minHeight: 8,
-              backgroundColor: Colors.white.withOpacity(0.3),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Colors.white.withOpacity(0.9),
-              ),
-            ),
-          ),
-        ],
+            );
+          }
+          return const Center(child: Text('Cargando rutinas...'));
+        },
       ),
     );
   }
 
-  Widget _buildActivityChart(bool isDark) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey.shade900 : Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+  Widget _buildRutinaCard(Rutina rutina) {
+    final completados = _diasCompletados[rutina.id]!;
+    final totalCompletados = completados.values.where((e) => e).length;
+    final porcentaje = ((totalCompletados / 7) * 100).toInt();
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: ExpansionTile(
+        leading: CircleAvatar(
+          backgroundColor: porcentaje == 100 ? Colors.green : Colors.blue,
+          child: Text(
+            '$totalCompletados/7',
+            style: const TextStyle(fontSize: 12, color: Colors.white),
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Actividad de la Semana',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 120,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: List.generate(7, (index) {
-                final dias = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-                final altura = 30.0 + (index * 10);
-                final isToday = index == _diaActual;
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Container(
-                      width: 35,
-                      height: altura,
-                      decoration: BoxDecoration(
-                        color:
-                            isToday
-                                ? Colors.deepOrange.shade400
-                                : Colors.blue.shade300,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      dias[index],
-                      style: TextStyle(
-                        fontWeight:
-                            isToday ? FontWeight.bold : FontWeight.normal,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                );
-              }),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDaySelector(bool isDark) {
-    final dias = [
-      'Lunes',
-      'Martes',
-      'Miércoles',
-      'Jueves',
-      'Viernes',
-      'Sábado',
-      'Domingo',
-    ];
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Selecciona el Día',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 50,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 7,
-              itemBuilder: (context, index) {
-                final isSelected = index == _diaActual;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() => _diaActual = index);
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient:
-                            isSelected
-                                ? LinearGradient(
-                                  colors: [
-                                    Colors.blue.shade400,
-                                    Colors.blue.shade600,
-                                  ],
-                                )
-                                : null,
-                        color: isSelected ? null : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Text(
-                          dias[index].substring(0, 3),
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black87,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRutinaCard(BuildContext context, Rutina rutina, bool isDark) {
-    final ejercicios = rutina.ejercicios;
-    final completados = _ejerciciosCompletados[rutina.id] ?? [];
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey.shade900 : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+        title: Text(
+          rutina.nombre,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: ExpansionTile(
-          title: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.deepOrange.shade300,
-                      Colors.deepOrange.shade600,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text(
-                    '${completados.where((e) => e).length}/${ejercicios.length}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      rutina.nombre,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      rutina.descripcion,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: List.generate(
-                  ejercicios.length,
-                  (index) => _buildEjercicioItem(
-                    rutina,
-                    index,
-                    ejercicios[index],
-                    completados[index],
-                  ),
-                ),
+            Text(rutina.descripcion),
+            const SizedBox(height: 4),
+            LinearProgressIndicator(
+              value: totalCompletados / 7,
+              backgroundColor: Colors.grey.shade300,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                porcentaje == 100 ? Colors.green : Colors.blue,
               ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Progreso: $porcentaje%',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
         ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Plan Semanal:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                ...List.generate(
+                  7,
+                  (dia) => _buildDiaItem(rutina, dia + 1, completados[dia + 1]!),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildEjercicioItem(
-    Rutina rutina,
-    int index,
-    String ejercicio,
-    bool completado,
-  ) {
-    final iconos = [
-      Icons.fitness_center,
-      Icons.directions_run,
-      Icons.accessibility,
-      Icons.self_improvement,
-      Icons.sports_gymnastics,
-      Icons.sports_basketball,
-      Icons.sports_soccer,
-    ];
-
+  Widget _buildDiaItem(Rutina rutina, int dia, bool completado) {
+    final dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    final alimentosDelDia = rutina.alimentos.where((a) => a.dia == dia).toList();
+    
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: GestureDetector(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: InkWell(
         onTap: () {
           setState(() {
-            final lista = _ejerciciosCompletados[rutina.id]!;
-            lista[index] = !lista[index];
+            _diasCompletados[rutina.id]![dia] = !completado;
           });
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
+        child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: completado ? Colors.green.shade50 : Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: completado ? Colors.green.shade300 : Colors.grey.shade300,
+              color: completado ? Colors.green : Colors.grey.shade300,
               width: completado ? 2 : 1,
             ),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color:
-                      completado ? Colors.green.shade400 : Colors.blue.shade300,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: Icon(
-                    completado ? Icons.check : iconos[index % iconos.length],
-                    color: Colors.white,
-                    size: completado ? 20 : 22,
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: completado ? Colors.green : Colors.blue,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        completado ? Icons.check : Icons.restaurant_menu,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      dias[dia - 1],
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        decoration: completado ? TextDecoration.lineThrough : null,
+                        color: completado ? Colors.grey : Colors.black87,
+                      ),
+                    ),
+                  ),
+                  if (completado)
+                    const Icon(Icons.check_circle, color: Colors.green, size: 24),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Día ${index + 1}: $ejercicio',
+              if (alimentosDelDia.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                const Divider(height: 1),
+                const SizedBox(height: 8),
+                ...alimentosDelDia.map((alimento) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.schedule,
+                        size: 16,
+                        color: completado ? Colors.grey : Colors.blue.shade700,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        alimento.horario,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: completado ? Colors.grey : Colors.blue.shade700,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          '${alimento.alimento} - ${alimento.cantidad}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: completado ? Colors.grey : Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+              ] else ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Sin alimentos registrados para este día',
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    decoration: completado ? TextDecoration.lineThrough : null,
-                    color: completado ? Colors.grey.shade600 : Colors.black87,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey.shade600,
                   ),
                 ),
-              ),
-              if (completado)
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade400,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.check, color: Colors.white, size: 16),
-                ),
+              ],
             ],
           ),
         ),

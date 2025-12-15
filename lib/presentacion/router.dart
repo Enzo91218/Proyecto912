@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:proyecto/presentacion/cubit/rutinas_cubit.dart';
 
 import '../inyector/main.dart' as inyector;
 import '../servicios/usuario_actual.dart';
@@ -87,11 +88,6 @@ final GoRouter appRouter = GoRouter(
           ),
     ),
     GoRoute(
-      path: '/rutinas',
-      name: 'rutinas',
-      builder: (context, state) => const PantallaRutinas(),
-    ),
-    GoRoute(
       path: '/perfil',
       name: 'perfil',
       builder: (context, state) => const PantallaPerfil(),
@@ -141,6 +137,14 @@ final GoRouter appRouter = GoRouter(
       path: '/herramientas',
       name: 'herramientas',
       builder: (context, state) => const PantallaHerramientas(),
+    ),
+    GoRoute(
+      path: '/rutinas',
+      name: 'rutinas',
+      builder: (context, state) => BlocProvider(
+        create: (_) => inyector.getIt<RutinasCubit>()..cargar(),
+        child: const PantallaRutinas(),
+      ),
     ),
     // RUTAS DE LOGIN Y REGISTRO COMENTADAS - La app inicia directamente en el menú
     /*

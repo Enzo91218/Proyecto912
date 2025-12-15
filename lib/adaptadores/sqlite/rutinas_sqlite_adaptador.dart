@@ -13,32 +13,51 @@ class RepositorioDeRutinasSqlite implements RepositorioDeRutinas {
   Future<List<Rutina>> obtenerRutinas() async {
     try {
       final db = await _provider.database;
-      final rutinasList = await db.query('rutinas');
+      print('🔍 Consultando tabla rutina_alimenticia...');
+      final rutinasList = await db.query('rutina_alimenticia');
+      print('📊 Rutinas encontradas: ${rutinasList.length}');
+      
+      if (rutinasList.isEmpty) {
+        print('⚠️ La tabla rutina_alimenticia está vacía');
+        return [];
+      }
 
       final rutinas = <Rutina>[];
       for (var rutina in rutinasList) {
-        final ejercicios = await db.query(
-          'rutinas_ejercicios',
-          where: 'rutina_id = ?',
+        print('🍽️ Procesando rutina: ${rutina['nombre']} (ID: ${rutina['id']})');
+        
+        final alimentosQuery = await db.query(
+          'rutina_alimenticia_alimentos',
+          where: 'rutina_alimenticia_id = ?',
           whereArgs: [rutina['id']],
+          orderBy: 'dia, horario',
         );
+        
+        print('   → Alimentos encontrados: ${alimentosQuery.length}');
+
+        final alimentos = alimentosQuery.map((a) => Alimento(
+          dia: (a['dia'] as int?) ?? 1,
+          horario: (a['horario'] as String?) ?? '00:00',
+          alimento: (a['alimento'] as String?) ?? '',
+          cantidad: (a['cantidad'] as String?) ?? '',
+        )).toList();
 
         rutinas.add(
           Rutina(
-            id: rutina['id'] as String? ?? '',
+            id: (rutina['id'] as int?)?.toString() ?? '',
             nombre: rutina['nombre'] as String? ?? '',
             descripcion: rutina['descripcion'] as String? ?? '',
-            ejercicios: ejercicios
-                .map((e) => (e['ejercicio'] as String?) ?? '')
-                .where((e) => e.isNotEmpty)
-                .toList(),
-            favorito: ((rutina['favorito'] as int?) ?? 0) == 1,
+            alimentos: alimentos,
+            favorito: false,
           ),
         );
       }
+      
+      print('✅ Total de rutinas cargadas: ${rutinas.length}');
       return rutinas;
     } catch (e) {
-      print('Error obteniendo rutinas: $e');
+      print('❌ Error obteniendo rutinas: $e');
+      print('📍 Stack trace: ${StackTrace.current}');
       return [];
     }
   }
@@ -47,18 +66,20 @@ class RepositorioDeRutinasSqlite implements RepositorioDeRutinas {
     final db = await _provider.database;
 
     // Insertar rutina
-    await db.insert('rutinas', {
-      'id': rutina.id,
+    await db.insert('rutina_alimenticia', {
+      'id': int.tryParse(rutina.id) ?? 0,
       'nombre': rutina.nombre,
       'descripcion': rutina.descripcion,
-      'favorito': rutina.favorito ? 1 : 0,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
 
-    // Insertar ejercicios
-    for (var ejercicio in rutina.ejercicios) {
-      await db.insert('rutinas_ejercicios', {
-        'rutina_id': rutina.id,
-        'ejercicio': ejercicio,
+    // Insertar alimentos
+    for (var alimento in rutina.alimentos) {
+      await db.insert('rutina_alimenticia_alimentos', {
+        'rutina_alimenticia_id': int.tryParse(rutina.id) ?? 0,
+        'dia': alimento.dia,
+        'horario': alimento.horario,
+        'alimento': alimento.alimento,
+        'cantidad': alimento.cantidad,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
 
@@ -70,28 +91,30 @@ class RepositorioDeRutinasSqlite implements RepositorioDeRutinas {
 
     // Actualizar rutina
     await db.update(
-      'rutinas',
+      'rutina_alimenticia',
       {
         'nombre': rutina.nombre,
         'descripcion': rutina.descripcion,
-        'favorito': rutina.favorito ? 1 : 0,
       },
       where: 'id = ?',
-      whereArgs: [rutina.id],
+      whereArgs: [int.tryParse(rutina.id) ?? 0],
     );
 
-    // Eliminar ejercicios viejos
+    // Eliminar alimentos viejos
     await db.delete(
-      'rutinas_ejercicios',
-      where: 'rutina_id = ?',
-      whereArgs: [rutina.id],
+      'rutina_alimenticia_alimentos',
+      where: 'rutina_alimenticia_id = ?',
+      whereArgs: [int.tryParse(rutina.id) ?? 0],
     );
 
-    // Insertar ejercicios nuevos
-    for (var ejercicio in rutina.ejercicios) {
-      await db.insert('rutinas_ejercicios', {
-        'rutina_id': rutina.id,
-        'ejercicio': ejercicio,
+    // Insertar alimentos nuevos
+    for (var alimento in rutina.alimentos) {
+      await db.insert('rutina_alimenticia_alimentos', {
+        'rutina_alimenticia_id': int.tryParse(rutina.id) ?? 0,
+        'dia': alimento.dia,
+        'horario': alimento.horario,
+        'alimento': alimento.alimento,
+        'cantidad': alimento.cantidad,
       });
     }
 
@@ -101,15 +124,15 @@ class RepositorioDeRutinasSqlite implements RepositorioDeRutinas {
   Future<void> eliminarRutina(String id) async {
     final db = await _provider.database;
 
-    // Eliminar ejercicios asociados (cascada)
+    // Eliminar alimentos asociados (cascada)
     await db.delete(
-      'rutinas_ejercicios',
-      where: 'rutina_id = ?',
-      whereArgs: [id],
+      'rutina_alimenticia_alimentos',
+      where: 'rutina_alimenticia_id = ?',
+      whereArgs: [int.tryParse(id) ?? 0],
     );
 
     // Eliminar rutina
-    await db.delete('rutinas', where: 'id = ?', whereArgs: [id]);
+    await db.delete('rutina_alimenticia', where: 'id = ?', whereArgs: [int.tryParse(id) ?? 0]);
 
     _provider.recordDatabaseUpdate();
   }

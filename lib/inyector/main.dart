@@ -35,12 +35,14 @@ import '../aplicacion/casos_de_uso/actualizar_peso_altura.dart';
 import '../aplicacion/casos_de_uso/registro_peso_altura.dart';
 import '../aplicacion/casos_de_uso/balance_peso_altura.dart';
 import '../aplicacion/casos_de_uso/cerrar_sesion.dart';
+import '../aplicacion/casos_de_uso/obtener_rutinas.dart';
 import '../presentacion/cubit/recetas_cubit.dart';
 import '../presentacion/cubit/dietas_cubit.dart';
 import '../presentacion/cubit/imc_cubit.dart';
 import '../presentacion/cubit/login_cubit.dart';
 import '../presentacion/cubit/registrar_cubit.dart';
 import '../presentacion/cubit/publicar_receta_cubit.dart';
+import '../presentacion/cubit/rutinas_cubit.dart';
 
 // El registro de casos de uso se realiza con las clases implementadas en aplicacion/casos_de_uso
 
@@ -137,6 +139,9 @@ void setupInyector() {
     ),
   );
   getIt.registerLazySingleton(() => CerrarSesion());
+  getIt.registerLazySingleton(
+    () => ObtenerRutinas(getIt<RepositorioDeRutinas>()),
+  );
 
   // Cubits (registrar como factory para crear instancias nuevas cuando BlocProvider las pida)
   getIt.registerFactory(() => RecetasCubit(
@@ -148,6 +153,7 @@ void setupInyector() {
   getIt.registerFactory(() => IMCCubit(getIt<CalcularIMC>()));
   getIt.registerFactory(() => LoginCubit(getIt<BuscarUsuarios>()));
   getIt.registerFactory(() => RegistrarCubit(getIt<RegistrarUsuario>()));
+  getIt.registerFactory(() => RutinasCubit(getIt<ObtenerRutinas>()));
 }
 
 void main() async {
