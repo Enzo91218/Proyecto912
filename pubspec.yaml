@@ -34,6 +34,7 @@ dependencies:
   path_provider: ^2.1.4
   sqflite: ^2.3.3+1
   sqflite_common_ffi: ^2.3.0
+  audioplayers: ^5.2.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -67,6 +68,8 @@ flutter:
 
   assets:
     - assets/db/proyecto912.db
+    - assets/videos/
+    - assets/audio/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

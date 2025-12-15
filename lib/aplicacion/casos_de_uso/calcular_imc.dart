@@ -5,7 +5,8 @@ class CalcularIMC {
   final RepositorioDeRegistroIMC repositorio;
   CalcularIMC(this.repositorio);
 
-  Future<List<ResultadoIMC>> call() {
-    return repositorio.obtenerRegistrosIMC();
+  Future<List<ResultadoIMC>> call(String usuarioId) {
+    return repositorio.obtenerRegistros(usuarioId);
   }
 }
+

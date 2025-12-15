@@ -6,6 +6,16 @@ class Usuario {
   final int edad;
   final double peso;
   final double altura;
+  final String? fotoPerfil;
 
-  Usuario({required this.id, required this.nombre, required this.email, required this.password, required this.edad, required this.peso, required this.altura});
+  Usuario({
+    required this.id,
+    required this.nombre,
+    required this.email,
+    required this.password,
+    required this.edad,
+    required this.peso,
+    required this.altura,
+    this.fotoPerfil,
+  });
 }

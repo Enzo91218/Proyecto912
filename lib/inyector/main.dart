@@ -1,10 +1,12 @@
 import 'package:get_it/get_it.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../presentacion/router.dart';
 import '../servicios/usuario_actual.dart';
 import '../servicios/tema_servicio.dart';
+import '../servicios/audio_service.dart';
 import '../servicios/database_update_service.dart';
 // Importar repositorios y adaptadores
 import '../dominio/repositorios/repositorio_de_recetas.dart';
@@ -43,6 +45,8 @@ import '../presentacion/cubit/login_cubit.dart';
 import '../presentacion/cubit/registrar_cubit.dart';
 import '../presentacion/cubit/publicar_receta_cubit.dart';
 import '../presentacion/cubit/rutinas_cubit.dart';
+import '../presentacion/cubit/registro_peso_cubit.dart';
+import '../presentacion/cubit/peso_altura_actual_cubit.dart';
 
 // El registro de casos de uso se realiza con las clases implementadas en aplicacion/casos_de_uso
 
@@ -54,6 +58,9 @@ void setupInyector() {
 
   // Servicio de tema
   getIt.registerSingleton<TemaServicio>(TemaServicio());
+
+  // Servicio de audio para música de fondo
+  getIt.registerSingleton<AudioService>(AudioService());
 
   // Base de datos SQLite
   getIt.registerSingleton<DatabaseProvider>(DatabaseProvider());
@@ -96,12 +103,12 @@ void setupInyector() {
   );
   getIt.registerLazySingleton(
     /// Registra la fábrica de [FiltrarRecetasPorCultura] en el contenedor de inyección de dependencias.
-    /// 
+    ///
     /// Esta función crea una nueva instancia de [FiltrarRecetasPorCultura] cada vez que es solicitada,
     /// inyectando automáticamente una instancia de [RepositorioDeRecetas] obtenida del contenedor [getIt].
-    /// 
+    ///
     /// **Caso de uso:** Filtrar recetas según criterios culturales específicos.
-    /// 
+    ///
     /// **Dependencias:**
     /// - Requiere que [RepositorioDeRecetas] esté previamente registrado en [getIt].
     () => FiltrarRecetasPorCultura(getIt<RepositorioDeRecetas>()),
@@ -136,6 +143,7 @@ void setupInyector() {
   getIt.registerLazySingleton(
     () => BalancePesoAlturaUC(
       repositorio: getIt<RepositorioDeRegistroPesoAltura>(),
+      repositorioIMC: getIt<RepositorioDeRegistroIMC>(),
     ),
   );
   getIt.registerLazySingleton(() => CerrarSesion());
@@ -144,26 +152,46 @@ void setupInyector() {
   );
 
   // Cubits (registrar como factory para crear instancias nuevas cuando BlocProvider las pida)
-  getIt.registerFactory(() => RecetasCubit(
-    getIt<BuscarRecetas>(),
-    getIt<FiltrarRecetasPorCultura>(),
-  ));
+  getIt.registerFactory(
+    () =>
+        RecetasCubit(getIt<BuscarRecetas>(), getIt<FiltrarRecetasPorCultura>()),
+  );
   getIt.registerFactory(() => PublicarRecetaCubit(getIt<PublicarReceta>()));
   getIt.registerFactory(() => DietasCubit(getIt<BuscarDietas>()));
-  getIt.registerFactory(() => IMCCubit(getIt<CalcularIMC>()));
+  getIt.registerFactoryParam<IMCCubit, String, void>(
+    (usuarioId, _) => IMCCubit(getIt<CalcularIMC>(), usuarioId: usuarioId),
+  );
   getIt.registerFactory(() => LoginCubit(getIt<BuscarUsuarios>()));
-  getIt.registerFactory(() => RegistrarCubit(getIt<RegistrarUsuario>()));
+  getIt.registerFactory(
+    () => RegistrarCubit(
+      getIt<RegistrarUsuario>(),
+      getIt<RepositorioDeRegistroPesoAltura>(),
+    ),
+  );
   getIt.registerFactory(() => RutinasCubit(getIt<ObtenerRutinas>()));
+  getIt.registerFactoryParam<RegistroPesoCubit, String, void>(
+    (usuarioId, _) => RegistroPesoCubit(
+      repositorio: getIt<RepositorioDeRegistroPesoAltura>(),
+      usuarioId: usuarioId,
+    ),
+  );
+  getIt.registerFactoryParam<PesoAlturaActualCubit, String, void>(
+    (usuarioId, _) => PesoAlturaActualCubit(
+      repositorio: getIt<RepositorioDeRegistroPesoAltura>(),
+    ),
+  );
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializar sqflite para plataformas de escritorio
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-    print('✓ SQLite FFI initialized for ${Platform.operatingSystem}');
+  // Inicializar sqflite para plataformas de escritorio (no en web)
+  if (!kIsWeb) {
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+      print('✓ SQLite FFI initialized for ${Platform.operatingSystem}');
+    }
   }
 
   setupInyector();

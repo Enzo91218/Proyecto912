@@ -3,12 +3,14 @@ class Alimento {
   final String horario;
   final String alimento;
   final String cantidad;
+  bool completada;
 
   Alimento({
     required this.dia,
     required this.horario,
     required this.alimento,
     required this.cantidad,
+    this.completada = false,
   });
 }
 

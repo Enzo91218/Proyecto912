@@ -20,6 +20,11 @@ class RecetasLoaded extends RecetasState {
   RecetasLoaded(this.recetas);
 }
 
+class CulturasLoaded extends RecetasState {
+  final List<String> culturas;
+  CulturasLoaded(this.culturas);
+}
+
 class RecetasError extends RecetasState {
   final String mensaje;
   RecetasError(this.mensaje);
@@ -30,6 +35,26 @@ class RecetasCubit extends Cubit<RecetasState> {
   final FiltrarRecetasPorCultura filtrarPorCultura;
   
   RecetasCubit(this.casoUso, this.filtrarPorCultura) : super(RecetasInitial());
+
+  Future<void> cargar() async {
+    emit(RecetasLoading());
+    try {
+      // Cargar todas las recetas usando búsqueda con lista vacía
+      final recetas = await casoUso.call([]);
+      emit(RecetasLoaded(recetas));
+    } catch (e) {
+      emit(RecetasError('Error al cargar recetas: $e'));
+    }
+  }
+
+  Future<void> cargarCulturas() async {
+    try {
+      final culturas = await casoUso.repositorio.obtenerCulturasUnicas();
+      emit(CulturasLoaded(['Todas', ...culturas]));
+    } catch (e) {
+      emit(RecetasError('Error al cargar culturas: $e'));
+    }
+  }
 
   Future<void> buscar(List<Ingrediente> ingredientes) async {
     emit(RecetasLoading());

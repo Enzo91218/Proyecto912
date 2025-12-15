@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
 import 'dart:io';
+import 'dart:convert';
 import '../../aplicacion/casos_de_uso/cerrar_sesion.dart';
 import '../../servicios/usuario_actual.dart';
 import '../../servicios/tema_servicio.dart';
+import '../../servicios/audio_service.dart';
+import '../cubit/recetas_cubit.dart';
+import '../cubit/peso_altura_actual_cubit.dart';
 
 class PantallaMenu extends StatefulWidget {
   const PantallaMenu({super.key});
@@ -15,6 +20,22 @@ class PantallaMenu extends StatefulWidget {
 
 class _PantallaMenuState extends State<PantallaMenu> {
   int _selectedIndex = 0;
+  late AudioService _audioService;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioService = GetIt.instance.get<AudioService>();
+    // Iniciar reproducción de música
+    _audioService.play();
+    
+    // Debug: mostrar si se inicializó correctamente
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!_audioService.isInitialized) {
+        print('⚠️ Audio no se inicializó, verifica que el archivo esté en assets/audio/background_music.mp3');
+      }
+    });
+  }
 
   final List<_NavItem> _navItems = [
     _NavItem(
@@ -182,139 +203,261 @@ class _PantallaMenuState extends State<PantallaMenu> {
     );
   }
 
+  Widget _buildProfileAvatar(String? fotoPerfil) {
+    if (fotoPerfil != null && fotoPerfil.isNotEmpty) {
+      try {
+        final bytes = base64Decode(fotoPerfil);
+        return CircleAvatar(
+          radius: 55,
+          backgroundColor: Colors.white,
+          backgroundImage: MemoryImage(bytes),
+        );
+      } catch (e) {
+        // Si hay error al decodificar, mostrar el icono por defecto
+        return CircleAvatar(
+          radius: 55,
+          backgroundColor: Colors.white,
+          child: Icon(Icons.person, size: 55, color: Colors.blue),
+        );
+      }
+    } else {
+      return CircleAvatar(
+        radius: 55,
+        backgroundColor: Colors.white,
+        child: Icon(Icons.person, size: 55, color: Colors.blue),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final usuarioActual = GetIt.instance.get<UsuarioActual>();
     final usuario = usuarioActual.usuario;
 
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Header con información
-          SliverAppBar(
-            expandedHeight: 200,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Colors.blue.shade400, Colors.blue.shade700],
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => GetIt.instance.get<RecetasCubit>()..cargar(),
+        ),
+        BlocProvider(
+          create:
+              (_) => GetIt.instance.get<PesoAlturaActualCubit>(
+                param1: usuario?.id ?? '',
+              )..cargar(usuario?.id ?? ''),
+        ),
+      ],
+      child: Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            // Header con información
+            SliverAppBar(
+              expandedHeight: 220,
+              pinned: true,
+              actions: [
+                // Botón de silencio en esquina superior derecha
+                ListenableBuilder(
+                  listenable: _audioService,
+                  builder: (context, child) {
+                    return IconButton(
+                      icon: Icon(
+                        _audioService.isMuted
+                            ? Icons.volume_mute  // Icono con X cuando está silenciado
+                            : Icons.volume_up,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                      onPressed: () {
+                        _audioService.toggleMute();
+                        setState(() {}); // Forzar reconstrucción
+                      },
+                      tooltip: _audioService.isMuted ? 'Activar sonido' : 'Silenciar',
+                    );
+                  },
+                ),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Colors.blue.shade400, Colors.blue.shade700],
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildProfileAvatar(usuario?.fotoPerfil),
+                      const SizedBox(height: 8),
+                      Text(
+                        usuario?.nombre ?? 'Usuario',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        usuario?.email ?? '',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.85),
+                          fontSize: 9,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
+              ),
+            ),
+            // Resumen del usuario
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.white,
-                      child: Icon(Icons.person, size: 40, color: Colors.blue),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      usuario?.nombre ?? 'Usuario',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
+                    const Text(
+                      'Tu Resumen',
+                      style: TextStyle(
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      usuario?.email ?? '',
+                    const SizedBox(height: 16),
+                    // Cards de estadísticas
+                    GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      children: [
+                        BlocBuilder<
+                          PesoAlturaActualCubit,
+                          PesoAlturaActualState
+                        >(
+                          builder: (context, state) {
+                            if (state is PesoAlturaActualLoaded) {
+                              return _StatCard(
+                                icon: Icons.scale,
+                                label: 'Peso Actual',
+                                value:
+                                    '${state.datos.peso.toStringAsFixed(1)} kg',
+                                color: Colors.blue,
+                              );
+                            } else {
+                              return _StatCard(
+                                icon: Icons.scale,
+                                label: 'Peso Actual',
+                                value:
+                                    '${usuario?.peso.toStringAsFixed(1) ?? '--'} kg',
+                                color: Colors.blue,
+                              );
+                            }
+                          },
+                        ),
+                        BlocBuilder<
+                          PesoAlturaActualCubit,
+                          PesoAlturaActualState
+                        >(
+                          builder: (context, state) {
+                            if (state is PesoAlturaActualLoaded) {
+                              // Si altura > 10, está en cm; si < 10, está en metros
+                              final alturaEnCm = state.datos.altura > 10
+                                  ? state.datos.altura
+                                  : state.datos.altura * 100;
+                              return _StatCard(
+                                icon: Icons.height,
+                                label: 'Altura',
+                                value:
+                                    '${alturaEnCm.toStringAsFixed(0)} cm',
+                                color: Colors.green,
+                              );
+                            } else {
+                              double alturaEnCm = 0;
+                              if (usuario?.altura != null) {
+                                final altura = usuario!.altura;
+                                alturaEnCm = altura > 10 ? altura : altura * 100;
+                              }
+                              return _StatCard(
+                                icon: Icons.height,
+                                label: 'Altura',
+                                value: alturaEnCm > 0
+                                    ? '${alturaEnCm.toStringAsFixed(0)} cm'
+                                    : '-- cm',
+                                color: Colors.green,
+                              );
+                            }
+                          },
+                        ),
+                        _StatCard(
+                          icon: Icons.cake,
+                          label: 'Edad',
+                          value: '${usuario?.edad ?? '--'} años',
+                          color: Colors.orange,
+                        ),
+                        _StatCard(
+                          icon: Icons.restaurant_menu,
+                          label: 'Recetas Disponibles',
+                          value: BlocBuilder<RecetasCubit, RecetasState>(
+                            builder: (context, state) {
+                              if (state is RecetasLoaded) {
+                                return Text('${state.recetas.length}');
+                              } else if (state is RecetasLoading) {
+                                return const Text('...');
+                              } else {
+                                return const Text('0');
+                              }
+                            },
+                          ),
+                          color: Colors.purple,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Acciones Rápidas',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 14,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    _ActionButton(
+                      icon: Icons.add,
+                      label: 'Publicar Receta',
+                      onTap: () => context.go('/publicar-receta'),
+                    ),
+                    const SizedBox(height: 8),
+                    _ActionButton(
+                      icon: Icons.monitor_weight,
+                      label: 'Calcular IMC',
+                      onTap: () => context.go('/imc'),
+                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
             ),
-          ),
-          // Resumen del usuario
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Tu Resumen',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  // Cards de estadísticas
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    children: [
-                      _StatCard(
-                        icon: Icons.scale,
-                        label: 'Peso Actual',
-                        value: '${usuario?.peso.toStringAsFixed(1) ?? '--'} kg',
-                        color: Colors.blue,
-                      ),
-                      _StatCard(
-                        icon: Icons.height,
-                        label: 'Altura',
-                        value:
-                            '${usuario?.altura.toStringAsFixed(2) ?? '--'} m',
-                        color: Colors.green,
-                      ),
-                      _StatCard(
-                        icon: Icons.cake,
-                        label: 'Edad',
-                        value: '${usuario?.edad ?? '--'} años',
-                        color: Colors.orange,
-                      ),
-                      _StatCard(
-                        icon: Icons.restaurant_menu,
-                        label: 'Recetas Disponibles',
-                        value: '--',
-                        color: Colors.purple,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Acciones Rápidas',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  _ActionButton(
-                    icon: Icons.add,
-                    label: 'Publicar Receta',
-                    onTap: () => context.go('/publicar-receta'),
-                  ),
-                  const SizedBox(height: 8),
-                  _ActionButton(
-                    icon: Icons.monitor_weight,
-                    label: 'Calcular IMC',
-                    onTap: () => context.go('/imc'),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _navigateTo,
+          type: BottomNavigationBarType.fixed,
+          items: [
+            for (int i = 0; i < _navItems.length; i++)
+              BottomNavigationBarItem(
+                icon: Icon(_navItems[i].icon),
+                label: _navItems[i].label,
               ),
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _navigateTo,
-        type: BottomNavigationBarType.fixed,
-        items: [
-          for (int i = 0; i < _navItems.length; i++)
-            BottomNavigationBarItem(
-              icon: Icon(_navItems[i].icon),
-              label: _navItems[i].label,
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -331,7 +474,7 @@ class _NavItem {
 class _StatCard extends StatefulWidget {
   final IconData icon;
   final String label;
-  final String value;
+  final dynamic value;
   final Color color;
 
   const _StatCard({
@@ -401,14 +544,16 @@ class _StatCardState extends State<_StatCard>
                 child: Icon(widget.icon, size: 24, color: widget.color),
               ),
               const SizedBox(height: 8),
-              Text(
-                widget.value,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: widget.color,
-                ),
-              ),
+              widget.value is Widget
+                  ? widget.value
+                  : Text(
+                    widget.value.toString(),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: widget.color,
+                    ),
+                  ),
               const SizedBox(height: 4),
               Text(
                 widget.label,

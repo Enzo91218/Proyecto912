@@ -16,15 +16,32 @@ class IMCError extends IMCState {
 
 class IMCCubit extends Cubit<IMCState> {
   final CalcularIMC casoUso;
-  IMCCubit(this.casoUso) : super(IMCInitial());
+  final String usuarioId;
+  
+  IMCCubit(this.casoUso, {required this.usuarioId}) : super(IMCInitial());
 
   Future<void> cargar() async {
     emit(IMCLoading());
     try {
-      final regs = await casoUso.call();
+      print('📥 IMCCubit: Cargando registros para usuario: $usuarioId');
+      final regs = await casoUso.repositorio.obtenerRegistros(usuarioId);
+      print('✓ IMCCubit: Se cargaron ${regs.length} registros');
       emit(IMCLoaded(regs));
     } catch (e) {
+      print('❌ IMCCubit Error: $e');
       emit(IMCError(e.toString()));
     }
   }
-}
+
+  Future<void> guardarRegistro(String usuarioId, double imc, String categoria) async {
+    try {
+      print('📥 Cubit: Guardando IMC para usuario $usuarioId: $imc, categoría: $categoria');
+      await casoUso.repositorio.guardarRegistroIMC(usuarioId, imc, categoria);
+      print('✅ Cubit: IMC guardado. Recargando...');
+      // Recargar lista
+      await cargar();
+    } catch (e) {
+      print('❌ Cubit Error: $e');
+      emit(IMCError('Error al guardar: $e'));
+    }
+  }}

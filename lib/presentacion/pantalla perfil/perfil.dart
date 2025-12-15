@@ -3,7 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'dart:convert';
 import '../../servicios/usuario_actual.dart';
+import '../../dominio/repositorios/repositorio_de_usuario.dart';
+import '../../dominio/entidades/usuario.dart';
 
 class PantallaPerfil extends StatefulWidget {
   const PantallaPerfil({super.key});
@@ -24,8 +27,80 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
   }
 
   Future<void> _cargarImagenGuardada() async {
-    // Aquí puedes implementar lógica para cargar imagen guardada
-    // Por ahora, dejamos que el usuario seleccione una imagen
+    final usuarioActual = GetIt.instance.get<UsuarioActual>();
+    final usuario = usuarioActual.usuario;
+    
+    if (usuario?.fotoPerfil != null && usuario!.fotoPerfil!.isNotEmpty) {
+      try {
+        // Decodificar Base64 a bytes
+        final bytes = base64Decode(usuario.fotoPerfil!);
+        final tempDir = Directory.systemTemp;
+        final tempFile = File('${tempDir.path}/perfil_temp.jpg');
+        await tempFile.writeAsBytes(bytes);
+        
+        setState(() {
+          _imagenPerfil = tempFile;
+        });
+      } catch (e) {
+        print('Error cargando imagen: $e');
+      }
+    }
+  }
+
+  Future<void> _guardarFotoPerfil() async {
+    if (_imagenPerfil == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecciona una foto primero')),
+      );
+      return;
+    }
+
+    try {
+      setState(() => _cargando = true);
+      
+      // Convertir imagen a Base64
+      final bytes = await _imagenPerfil!.readAsBytes();
+      final base64String = base64Encode(bytes);
+      
+      // Actualizar usuario
+      final usuarioActual = GetIt.instance.get<UsuarioActual>();
+      final usuario = usuarioActual.usuario!;
+      
+      final usuarioActualizado = Usuario(
+        id: usuario.id,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        password: usuario.password,
+        edad: usuario.edad,
+        peso: usuario.peso,
+        altura: usuario.altura,
+        fotoPerfil: base64String,
+      );
+      
+      // Guardar en BD
+      final repositorio = GetIt.instance.get<RepositorioDeUsuario>();
+      print('DEBUG: Guardando usuario con fotoPerfil de ${base64String.length} bytes');
+      await repositorio.actualizarUsuario(usuarioActualizado);
+      print('DEBUG: Usuario guardado en BD');
+      
+      // Actualizar usuario actual
+      usuarioActual.setUsuario(usuarioActualizado);
+      print('DEBUG: Usuario actual actualizado');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Foto de perfil guardada ✓')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar: $e')),
+        );
+      }
+    } finally {
+      setState(() => _cargando = false);
+    }
   }
 
   Future<void> _seleccionarImagen() async {
@@ -285,6 +360,32 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
                     isDark: isDark,
                   ),
                   const SizedBox(height: 12),
+                  if (_imagenPerfil != null)
+                    ElevatedButton.icon(
+                      onPressed: _cargando ? null : _guardarFotoPerfil,
+                      icon: _cargando
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(Icons.save),
+                      label: Text(_cargando ? 'Guardando...' : 'Guardar Foto'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepOrange.shade400,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  if (_imagenPerfil != null) const SizedBox(height: 12),
                   _buildInfoCard(
                     context,
                     title: 'Email',

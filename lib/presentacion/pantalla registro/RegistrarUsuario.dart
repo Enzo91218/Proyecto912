@@ -27,7 +27,7 @@ class _PantallaRegistrarUsuarioState extends State<PantallaRegistrarUsuario> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => context.go('/'),
+          onPressed: () => context.go('/login'),
         ),
         title: const Text('Registrar usuario'),
       ),
@@ -66,7 +66,7 @@ class _PantallaRegistrarUsuarioState extends State<PantallaRegistrarUsuario> {
               const SizedBox(height: 10),
               TextField(
                 controller: alturaCtrl,
-                decoration: const InputDecoration(labelText: 'Altura (m)'),
+                decoration: const InputDecoration(labelText: 'Altura (cm)'),
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 20),
@@ -114,7 +114,7 @@ class _PantallaRegistrarUsuarioState extends State<PantallaRegistrarUsuario> {
                             password: passCtrl.text,
                             edad: int.parse(edadCtrl.text),
                             peso: double.parse(pesoCtrl.text),
-                            altura: double.parse(alturaCtrl.text),
+                            altura: double.parse(alturaCtrl.text) / 100,
                           ),
                         );
                       },

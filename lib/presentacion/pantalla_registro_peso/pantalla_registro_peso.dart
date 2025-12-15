@@ -14,9 +14,7 @@ class _PantallaRegistroPesoState extends State<PantallaRegistroPeso> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RegistroPesoCubit>().cargar();
-    });
+    // cargar() se ejecuta en el router
   }
 
   @override
@@ -36,21 +34,26 @@ class _PantallaRegistroPesoState extends State<PantallaRegistroPeso> {
             return const Center(child: CircularProgressIndicator());
           } else if (state is RegistroPesoCargado) {
             if (state.registros.isEmpty) {
-              return const Center(child: Text('No hay registros de peso y altura'));
+              return const Center(
+                child: Text('No hay registros de peso y altura'),
+              );
             }
             return ListView.builder(
               padding: const EdgeInsets.all(10),
               itemCount: state.registros.length,
               itemBuilder: (context, index) {
                 final registro = state.registros[index];
-                final fechaFormato = '${registro.fecha.day}/${registro.fecha.month}/${registro.fecha.year}';
+                final fechaFormato =
+                    '${registro.fecha.day}/${registro.fecha.month}/${registro.fecha.year}';
 
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   child: ListTile(
                     leading: const Icon(Icons.monitor_weight),
                     title: Text('Peso: ${registro.peso.toStringAsFixed(2)} kg'),
-                    subtitle: Text('Altura: ${registro.altura.toStringAsFixed(2)} m\nFecha: $fechaFormato'),
+                    subtitle: Text(
+                      'Altura: ${(registro.altura > 10 ? registro.altura : registro.altura * 100).toStringAsFixed(0)} cm\nFecha: $fechaFormato',
+                    ),
                   ),
                 );
               },
@@ -61,7 +64,6 @@ class _PantallaRegistroPesoState extends State<PantallaRegistroPeso> {
           return const SizedBox();
         },
       ),
-      floatingActionButton: null,
     );
   }
 }

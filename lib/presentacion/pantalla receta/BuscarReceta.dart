@@ -15,20 +15,14 @@ class PantallaRecetas extends StatefulWidget {
 class _PantallaRecetasState extends State<PantallaRecetas> {
   final TextEditingController _controller = TextEditingController();
   String? _culturaSeleccionada;
+  List<String> _culturas = ['Todas'];
 
-  final List<String> _culturas = [
-    'Todas',
-    'Mexicana',
-    'Italiana',
-    'China',
-    'Japonesa',
-    'India',
-    'Francesa',
-    'Española',
-    'Árabe',
-    'Peruana',
-    'Tailandesa',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Cargar culturas de la BD cuando se inicia la pantalla
+    context.read<RecetasCubit>().cargarCulturas();
+  }
 
   void _buscarReceta() {
     final ingredientes = _controller.text
@@ -131,79 +125,88 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                setState(() {
-                  _culturaSeleccionada = value;
-                });
-                _buscarPorCultura(value);
-              },
-              itemBuilder: (context) => _culturas
-                  .map((cultura) => PopupMenuItem<String>(
-                        value: cultura,
-                        child: Row(
-                          children: [
-                            Icon(
-                              _culturaSeleccionada == cultura
-                                  ? Icons.check_circle
-                                  : Icons.public,
-                              color: _culturaSeleccionada == cultura
-                                  ? Colors.blue
-                                  : Colors.grey,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              cultura,
-                              style: TextStyle(
-                                fontWeight: _culturaSeleccionada == cultura
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+              // Dropdown de culturas que se actualiza desde el Cubit
+              BlocBuilder<RecetasCubit, RecetasState>(
+                builder: (context, state) {
+                  if (state is CulturasLoaded) {
+                    _culturas = state.culturas;
+                  }
+                  
+                  return PopupMenuButton<String>(
+                    onSelected: (value) {
+                      setState(() {
+                        _culturaSeleccionada = value;
+                      });
+                      _buscarPorCultura(value);
+                    },
+                    itemBuilder: (context) => _culturas
+                        .map((cultura) => PopupMenuItem<String>(
+                              value: cultura,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    _culturaSeleccionada == cultura
+                                        ? Icons.check_circle
+                                        : Icons.public,
+                                    color: _culturaSeleccionada == cultura
+                                        ? Colors.blue
+                                        : Colors.grey,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    cultura,
+                                    style: TextStyle(
+                                      fontWeight: _culturaSeleccionada == cultura
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                      ))
-                  .toList(),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.public, color: Colors.grey),
-                        const SizedBox(width: 12),
-                        Text(
-                          _culturaSeleccionada ?? 'Selecciona una cultura',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: _culturaSeleccionada != null
-                                ? Colors.black87
-                                : Colors.grey,
+                            ))
+                        .toList(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.public, color: Colors.grey),
+                              const SizedBox(width: 12),
+                              Text(
+                                _culturaSeleccionada ?? 'Selecciona una cultura',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: _culturaSeleccionada != null
+                                      ? Colors.black87
+                                      : Colors.grey,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                          const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                        ],
+                      ),
                     ),
-                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                  ],
-                ),
+                  );
+                },
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                labelText: "Buscar por ingredientes (separados por coma)",
-                border: OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: _buscarReceta,
-                ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  labelText: "Buscar por ingredientes (separados por coma)",
+                  border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: _buscarReceta,
+                  ),
               ),
             ),
             const SizedBox(height: 16),

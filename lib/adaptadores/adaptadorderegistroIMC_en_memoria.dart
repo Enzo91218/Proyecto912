@@ -3,7 +3,13 @@ import '../dominio/repositorios/repositorio_de_registroIMC.dart';
 
 class RepositorioDeRegistroIMCA implements RepositorioDeRegistroIMC {
   @override
-  Future<List<ResultadoIMC>> obtenerRegistrosIMC() async {
+  Future<void> guardarRegistroIMC(String usuarioId, double imc, String categoria) async {
+    // En memoria no se guarda, solo retorna
+    print('En memoria: guardando IMC para usuario $usuarioId: $imc - $categoria');
+  }
+
+  @override
+  Future<List<ResultadoIMC>> obtenerRegistros(String usuarioId) async {
     // aca empiezan los ejemplos
     return [
       ResultadoIMC(imc: 16.8, categoria: 'Bajo peso'),

@@ -1,12 +1,17 @@
 import '../../dominio/entidades/registro_peso_altura_entidad.dart';
 import '../../dominio/entidades/balance_peso_altura.dart';
 import '../../dominio/repositorios/repositorio_de_registro_peso_altura.dart';
+import '../../dominio/repositorios/repositorio_de_registroIMC.dart';
 import 'dart:math';
 
 class BalancePesoAlturaUC {
   final RepositorioDeRegistroPesoAltura repositorio;
+  final RepositorioDeRegistroIMC repositorioIMC;
 
-  BalancePesoAlturaUC({required this.repositorio});
+  BalancePesoAlturaUC({
+    required this.repositorio,
+    required this.repositorioIMC,
+  });
 
   Future<BalancePesoAltura> ejecutar(String usuarioId) async {
     final registros = await repositorio.obtenerRegistros(usuarioId);
@@ -24,9 +29,36 @@ class BalancePesoAlturaUC {
     final pesoActual = registroActual.peso;
     final alturaActual = registroActual.altura;
 
-    // Calcular IMC
-    final imc = _calcularIMC(pesoActual, alturaActual);
-    final categoria = _obtenerCategoria(imc);
+    // Obtener IMC del último registro de registros_imc
+    double imc = 0.0;
+    String categoria = 'Normal';
+    
+    print('📊 Buscando IMC de registros_imc para usuario: $usuarioId');
+    try {
+      final registrosIMC = await repositorioIMC.obtenerRegistros(usuarioId);
+      print('📊 Se encontraron ${registrosIMC.length} registros de IMC');
+      
+      if (registrosIMC.isNotEmpty) {
+        // Obtener el último registro de IMC (primero en la lista porque está ordenado DESC)
+        final ultimoIMC = registrosIMC.first;
+        imc = ultimoIMC.imc;
+        categoria = ultimoIMC.categoria;
+        print('✓ IMC obtenido de registros_imc: $imc ($categoria)');
+      } else {
+        // Si no hay registros de IMC, calcularlo desde peso/altura
+        print('⚠ No hay registros de IMC, calculando desde peso ($pesoActual kg) y altura ($alturaActual m)');
+        imc = _calcularIMC(pesoActual, alturaActual);
+        categoria = _obtenerCategoria(imc);
+        print('📊 IMC calculado: $imc ($categoria)');
+      }
+    } catch (e) {
+      // Si hay error, calcular IMC desde peso/altura
+      print('❌ Error obteniendo IMC de registros: $e');
+      print('⚠ Calculando IMC desde peso ($pesoActual kg) y altura ($alturaActual m)');
+      imc = _calcularIMC(pesoActual, alturaActual);
+      categoria = _obtenerCategoria(imc);
+      print('📊 IMC calculado como fallback: $imc ($categoria)');
+    }
 
     // Calcular litros de agua diaria
     final litrosAgua = _calcularLitrosAgua(pesoActual);
@@ -55,7 +87,13 @@ class BalancePesoAlturaUC {
   }
 
   double _calcularIMC(double peso, double altura) {
-    return peso / pow(altura, 2);
+    if (altura <= 0) {
+      print('⚠ Altura inválida: $altura, retornando 0.0');
+      return 0.0;
+    }
+    final resultado = peso / pow(altura, 2);
+    print('📐 Cálculo IMC: $peso kg / ($altura m)² = $resultado');
+    return resultado;
   }
 
   String _obtenerCategoria(double imc) {

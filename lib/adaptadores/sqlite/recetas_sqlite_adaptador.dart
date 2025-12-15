@@ -116,4 +116,16 @@ class RepositorioDeRecetasSqlite implements RepositorioDeRecetas {
       cultura: data['cultura'] as String,
     );
   }
+
+  @override
+  Future<List<String>> obtenerCulturasUnicas() async {
+    final db = await _provider.database;
+    final result = await db.rawQuery(
+      'SELECT DISTINCT cultura FROM recetas ORDER BY cultura ASC'
+    );
+    
+    return result
+        .map((row) => row['cultura'] as String)
+        .toList();
+  }
 }

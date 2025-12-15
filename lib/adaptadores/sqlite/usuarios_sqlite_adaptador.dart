@@ -23,6 +23,7 @@ class RepositorioDeUsuarioSqlite implements RepositorioDeUsuario {
             edad: row['edad'] as int,
             peso: (row['peso'] as num).toDouble(),
             altura: (row['altura'] as num).toDouble(),
+            fotoPerfil: row['foto_perfil'] as String?,
           ),
         )
         .toList();
@@ -41,6 +42,7 @@ class RepositorioDeUsuarioSqlite implements RepositorioDeUsuario {
         'edad': usuario.edad,
         'peso': usuario.peso,
         'altura': usuario.altura,
+        'foto_perfil': usuario.fotoPerfil,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -58,6 +60,7 @@ class RepositorioDeUsuarioSqlite implements RepositorioDeUsuario {
         'edad': usuario.edad,
         'peso': usuario.peso,
         'altura': usuario.altura,
+        'foto_perfil': usuario.fotoPerfil,
       },
       where: 'id = ?',
       whereArgs: [usuario.id],

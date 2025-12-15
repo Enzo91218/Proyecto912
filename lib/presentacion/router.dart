@@ -95,11 +95,23 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/imc',
       name: 'imc',
-      builder:
-          (context, state) => BlocProvider(
-            create: (_) => inyector.getIt<IMCCubit>(),
-            child: const PantallaIMC(),
-          ),
+      builder: (context, state) {
+        final usuarioActual = GetIt.instance.get<UsuarioActual>();
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => inyector.getIt<IMCCubit>(param1: usuarioActual.id),
+            ),
+            BlocProvider(
+              create:
+                  (_) => inyector.getIt.get<RegistroPesoCubit>(
+                    param1: usuarioActual.id,
+                  ),
+            ),
+          ],
+          child: const PantallaIMC(),
+        );
+      },
     ),
     GoRoute(
       path: '/registro-peso',
@@ -112,7 +124,7 @@ final GoRouter appRouter = GoRouter(
               (_) => RegistroPesoCubit(
                 repositorio: inyector.getIt(),
                 usuarioId: usuarioId,
-              ),
+              )..cargar(),
           child: const PantallaRegistroPeso(),
         );
       },
@@ -141,10 +153,11 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/rutinas',
       name: 'rutinas',
-      builder: (context, state) => BlocProvider(
-        create: (_) => inyector.getIt<RutinasCubit>()..cargar(),
-        child: const PantallaRutinas(),
-      ),
+      builder:
+          (context, state) => BlocProvider(
+            create: (_) => inyector.getIt<RutinasCubit>()..cargar(),
+            child: const PantallaRutinas(),
+          ),
     ),
     // RUTAS DE LOGIN Y REGISTRO COMENTADAS - La app inicia directamente en el menú
     /*

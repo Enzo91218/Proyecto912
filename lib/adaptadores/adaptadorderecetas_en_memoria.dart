@@ -62,10 +62,20 @@ class RepositorioDeRecetasA implements RepositorioDeRecetas {
   Future<void> agregarReceta(Receta receta) async {
     _recetas.add(receta);
   }
+  
   @override
   Future<Receta?> obtenerRecetaAleatoria() async {
     if (_recetas.isEmpty) return null;
     _recetas.shuffle();
     return _recetas.first;
+  }
+
+  @override
+  Future<List<String>> obtenerCulturasUnicas() async {
+    final culturas = <String>{};
+    for (final receta in _recetas) {
+      culturas.add(receta.cultura);
+    }
+    return culturas.toList()..sort();
   }
 }

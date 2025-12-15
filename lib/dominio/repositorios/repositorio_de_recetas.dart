@@ -8,4 +8,5 @@ abstract class RepositorioDeRecetas {
 
   Future<void> agregarReceta(Receta receta);
   Future<Receta?> obtenerRecetaAleatoria();
+  Future<List<String>> obtenerCulturasUnicas();
 }

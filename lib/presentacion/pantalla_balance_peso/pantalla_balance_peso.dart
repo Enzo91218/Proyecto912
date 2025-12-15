@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../dominio/entidades/balance_peso_altura.dart';
-import '../../servicios/usuario_actual.dart';
-import 'package:get_it/get_it.dart';
 import '../cubit/balance_peso_cubit.dart';
 
 class PantallaBalancePeso extends StatefulWidget {
@@ -24,15 +22,6 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
 
   @override
   Widget build(BuildContext context) {
-    final usuarioActual = GetIt.instance.get<UsuarioActual>();
-    final usuario = usuarioActual.usuario;
-    
-    // Calcular hidratación
-    final pesoUsuario = usuario?.peso ?? 70;
-    final aguaDiariaML = (pesoUsuario * 35).toInt();
-    final aguaDiariaL = (aguaDiariaML / 1000).toStringAsFixed(2);
-    final vasosPorDia = (aguaDiariaML / 250).toStringAsFixed(1);
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -49,6 +38,12 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
           } else if (state is BalancePesoCargado) {
             final balance = state.balance;
             
+            // Calcular hidratación basada en el peso ACTUAL (del último registro)
+            final pesoActualBalance = balance.pesoActual;
+            final aguaDiariaML = (pesoActualBalance * 35).toInt();
+            final aguaDiariaL = (aguaDiariaML / 1000).toStringAsFixed(2);
+            final vasosPorDia = (aguaDiariaML / 250).toStringAsFixed(1);
+            
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -59,7 +54,7 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
                   const SizedBox(height: 16),
                   
                   // Sección de Hidratación
-                  _buildSeccionHidratacion(pesoUsuario, aguaDiariaML, aguaDiariaL, vasosPorDia),
+                  _buildSeccionHidratacion(pesoActualBalance, aguaDiariaML, aguaDiariaL, vasosPorDia),
                   const SizedBox(height: 16),
                   
                   // Gráfica simple de progreso de peso
@@ -94,7 +89,7 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildStatItem('Peso', '${balance.pesoActual.toStringAsFixed(1)} kg', Colors.blue),
-                _buildStatItem('Altura', '${balance.alturaActual.toStringAsFixed(2)} m', Colors.green),
+                _buildStatItem('Altura', '${balance.alturaActual.toStringAsFixed(2)} cm', Colors.green),
                 _buildStatItem('IMC', balance.imc.toStringAsFixed(1), Colors.orange),
               ],
             ),

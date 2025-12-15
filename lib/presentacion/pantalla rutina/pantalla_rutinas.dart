@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:get_it/get_it.dart';
 import '../../dominio/entidades/rutina.dart';
 import '../cubit/rutinas_cubit.dart';
+import '../../dominio/repositorios/repositorio_de_rutinas.dart';
 
 class PantallaRutinas extends StatefulWidget {
   const PantallaRutinas({Key? key}) : super(key: key);
@@ -91,8 +93,19 @@ class _PantallaRutinasState extends State<PantallaRutinas> {
   }
 
   Widget _buildRutinaCard(Rutina rutina) {
-    final completados = _diasCompletados[rutina.id]!;
-    final totalCompletados = completados.values.where((e) => e).length;
+    // Calcular días completados basado en los alimentos de la BD
+    final diasCompletados = <int, bool>{};
+    for (int dia = 1; dia <= 7; dia++) {
+      // Un día se considera completado si todos sus alimentos están completados
+      final alimentosDelDia = rutina.alimentos.where((a) => a.dia == dia).toList();
+      if (alimentosDelDia.isEmpty) {
+        diasCompletados[dia] = false;
+      } else {
+        diasCompletados[dia] = alimentosDelDia.every((a) => a.completada);
+      }
+    }
+    
+    final totalCompletados = diasCompletados.values.where((e) => e).length;
     final porcentaje = ((totalCompletados / 7) * 100).toInt();
 
     return Card(
@@ -141,7 +154,7 @@ class _PantallaRutinasState extends State<PantallaRutinas> {
                 const SizedBox(height: 12),
                 ...List.generate(
                   7,
-                  (dia) => _buildDiaItem(rutina, dia + 1, completados[dia + 1]!),
+                  (dia) => _buildDiaItem(rutina, dia + 1, diasCompletados[dia + 1]!),
                 ),
               ],
             ),
@@ -158,10 +171,18 @@ class _PantallaRutinasState extends State<PantallaRutinas> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: InkWell(
-        onTap: () {
-          setState(() {
-            _diasCompletados[rutina.id]![dia] = !completado;
-          });
+        onTap: () async {
+          // Obtener el estado actual del primer alimento del día
+          final estadoActual = alimentosDelDia.isNotEmpty ? alimentosDelDia.first.completada : completado;
+          
+          // Actualizar en BD
+          final repositorio = GetIt.instance.get<RepositorioDeRutinas>();
+          await repositorio.marcarDiaCompletado(rutina.id, dia, !estadoActual);
+          
+          // Recargar rutinas
+          if (mounted) {
+            context.read<RutinasCubit>().cargar();
+          }
         },
         child: Container(
           padding: const EdgeInsets.all(12),
