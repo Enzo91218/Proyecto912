@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import '../../aplicacion/casos_de_uso/buscar_recetas.dart';
+import '../../aplicacion/casos_de_uso/filtrar_recetas_por_cultura.dart';
 import '../../dominio/entidades/receta.dart';
 import '../../dominio/entidades/ingrediente.dart';
 
@@ -26,7 +27,9 @@ class RecetasError extends RecetasState {
 
 class RecetasCubit extends Cubit<RecetasState> {
   final BuscarRecetas casoUso;
-  RecetasCubit(this.casoUso) : super(RecetasInitial());
+  final FiltrarRecetasPorCultura filtrarPorCultura;
+  
+  RecetasCubit(this.casoUso, this.filtrarPorCultura) : super(RecetasInitial());
 
   Future<void> buscar(List<Ingrediente> ingredientes) async {
     emit(RecetasLoading());
@@ -46,12 +49,30 @@ class RecetasCubit extends Cubit<RecetasState> {
     }
   }
 
+  Future<void> buscarPorCultura(String cultura) async {
+    emit(RecetasLoading());
+    try {
+      final recetas = await filtrarPorCultura.call(cultura);
+      if (recetas.isEmpty) {
+        emit(RecetasError('No se encontraron recetas de la cultura: $cultura'));
+        return;
+      }
+      emit(RecetasLoaded(recetas));
+    } catch (e) {
+      emit(RecetasError(e.toString()));
+    }
+  }
+
   Future<void> mostrarAleatoria() async {
-    final receta = await casoUso.repositorio.obtenerRecetaAleatoria();
-    if (receta != null) {
-      emit(RecetaAleatoriaLoaded(receta));
-    } else {
-      emit(RecetasError('No hay recetas disponibles.'));
+    try {
+      final receta = await casoUso.repositorio.obtenerRecetaAleatoria();
+      if (receta != null) {
+        emit(RecetaAleatoriaLoaded(receta));
+      } else {
+        emit(RecetasError('No hay recetas disponibles.'));
+      }
+    } catch (e) {
+      emit(RecetasError('Error al obtener receta aleatoria: $e'));
     }
   }
 }

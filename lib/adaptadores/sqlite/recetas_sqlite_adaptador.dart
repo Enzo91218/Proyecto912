@@ -50,8 +50,11 @@ class RepositorioDeRecetasSqlite implements RepositorioDeRecetas {
     final db = await _provider.database;
     final recetas = await db.query('recetas');
     if (recetas.isEmpty) return null;
-    recetas.shuffle();
-    final seleccionada = recetas.first;
+    
+    // Crear una lista mutable antes de hacer shuffle
+    final recetasMutables = List<Map<String, Object?>>.from(recetas);
+    recetasMutables.shuffle();
+    final seleccionada = recetasMutables.first;
     return mapearReceta(seleccionada, db);
   }
 

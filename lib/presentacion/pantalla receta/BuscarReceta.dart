@@ -14,6 +14,21 @@ class PantallaRecetas extends StatefulWidget {
 
 class _PantallaRecetasState extends State<PantallaRecetas> {
   final TextEditingController _controller = TextEditingController();
+  String? _culturaSeleccionada;
+
+  final List<String> _culturas = [
+    'Todas',
+    'Mexicana',
+    'Italiana',
+    'China',
+    'Japonesa',
+    'India',
+    'Francesa',
+    'Española',
+    'Árabe',
+    'Peruana',
+    'Tailandesa',
+  ];
 
   void _buscarReceta() {
     final ingredientes = _controller.text
@@ -23,6 +38,14 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
         .map((s) => Ingrediente(id: s, nombre: s, cantidad: 'a gusto'))
         .toList();
     context.read<RecetasCubit>().buscar(ingredientes);
+  }
+
+  void _buscarPorCultura(String? cultura) {
+    if (cultura == null || cultura == 'Todas') {
+      context.read<RecetasCubit>().buscar([]);
+    } else {
+      context.read<RecetasCubit>().buscarPorCultura(cultura);
+    }
   }
 
   @override
@@ -36,18 +59,166 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
         ),
         title: const Text("Buscar Receta"),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
+      body: BlocListener<RecetasCubit, RecetasState>(
+        listener: (context, state) {
+          if (state is RecetaAleatoriaLoaded) {
+            final receta = state.receta;
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Row(
+                  children: [
+                    const Icon(Icons.casino, color: Colors.blue),
+                    const SizedBox(width: 8),
+                    const Text('Receta Aleatoria'),
+                  ],
+                ),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        receta.titulo,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(receta.descripcion),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Cultura: ${receta.cultura}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Ingredientes:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      ...receta.ingredientes
+                          .map((i) => Padding(
+                                padding: const EdgeInsets.only(left: 8, top: 4),
+                                child: Text('• ${i.nombre} (${i.cantidad})'),
+                              ))
+                          .toList(),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cerrar'),
+                  ),
+                ],
+              ),
+            );
+          } else if (state is RecetasError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.mensaje),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                setState(() {
+                  _culturaSeleccionada = value;
+                });
+                _buscarPorCultura(value);
+              },
+              itemBuilder: (context) => _culturas
+                  .map((cultura) => PopupMenuItem<String>(
+                        value: cultura,
+                        child: Row(
+                          children: [
+                            Icon(
+                              _culturaSeleccionada == cultura
+                                  ? Icons.check_circle
+                                  : Icons.public,
+                              color: _culturaSeleccionada == cultura
+                                  ? Colors.blue
+                                  : Colors.grey,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              cultura,
+                              style: TextStyle(
+                                fontWeight: _culturaSeleccionada == cultura
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ))
+                  .toList(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.public, color: Colors.grey),
+                        const SizedBox(width: 12),
+                        Text(
+                          _culturaSeleccionada ?? 'Selecciona una cultura',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: _culturaSeleccionada != null
+                                ? Colors.black87
+                                : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             TextField(
               controller: _controller,
               decoration: InputDecoration(
-                labelText: "Ingrese ingredientes separados por coma",
+                labelText: "Buscar por ingredientes (separados por coma)",
                 border: OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: _buscarReceta,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Botón de receta aleatoria
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  context.read<RecetasCubit>().mostrarAleatoria();
+                },
+                icon: const Icon(Icons.casino),
+                label: const Text('Sorpréndeme con una receta aleatoria'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
               ),
             ),
@@ -71,6 +242,14 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
                               children: [
                                 Text(r.descripcion),
                                 const SizedBox(height: 4),
+                                Text(
+                                  'Cultura: ${r.cultura}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
                                 const Text('Ingredientes:', style: TextStyle(fontWeight: FontWeight.bold)),
                                 ...r.ingredientes.map((ing) => Text('- ${ing.nombre} (${ing.cantidad})')).toList(),
                               ],
@@ -82,12 +261,13 @@ class _PantallaRecetasState extends State<PantallaRecetas> {
                   } else if (state is RecetasError) {
                     return Center(child: Text('Error: ${state.mensaje}'));
                   }
-                  return const Center(child: Text('Busca recetas por ingredientes'));
+                  return const Center(child: Text('Selecciona una cultura o busca por ingredientes'));
                 },
               ),
             ),
           ],
         ),
+      ),
       ),
     );
   }

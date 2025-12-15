@@ -93,6 +93,15 @@ void setupInyector() {
     () => BuscarRecetas(getIt<RepositorioDeRecetas>()),
   );
   getIt.registerLazySingleton(
+    /// Registra la fábrica de [FiltrarRecetasPorCultura] en el contenedor de inyección de dependencias.
+    /// 
+    /// Esta función crea una nueva instancia de [FiltrarRecetasPorCultura] cada vez que es solicitada,
+    /// inyectando automáticamente una instancia de [RepositorioDeRecetas] obtenida del contenedor [getIt].
+    /// 
+    /// **Caso de uso:** Filtrar recetas según criterios culturales específicos.
+    /// 
+    /// **Dependencias:**
+    /// - Requiere que [RepositorioDeRecetas] esté previamente registrado en [getIt].
     () => FiltrarRecetasPorCultura(getIt<RepositorioDeRecetas>()),
   );
   getIt.registerLazySingleton(
@@ -130,7 +139,10 @@ void setupInyector() {
   getIt.registerLazySingleton(() => CerrarSesion());
 
   // Cubits (registrar como factory para crear instancias nuevas cuando BlocProvider las pida)
-  getIt.registerFactory(() => RecetasCubit(getIt<BuscarRecetas>()));
+  getIt.registerFactory(() => RecetasCubit(
+    getIt<BuscarRecetas>(),
+    getIt<FiltrarRecetasPorCultura>(),
+  ));
   getIt.registerFactory(() => PublicarRecetaCubit(getIt<PublicarReceta>()));
   getIt.registerFactory(() => DietasCubit(getIt<BuscarDietas>()));
   getIt.registerFactory(() => IMCCubit(getIt<CalcularIMC>()));
