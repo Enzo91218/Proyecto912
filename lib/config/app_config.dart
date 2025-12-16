@@ -6,7 +6,7 @@ class AppConfig {
   // Google Gemini API Key
   // Obtén tu API key en: https://aistudio.google.com/app/apikey
   // Reemplaza "YOUR_API_KEY_HERE" con tu propia key
-  static const String googleGeminiApiKey = 'AIzaSyCfy3CaFehvQj9DwBiHRZw2bOaO5sSToaU';
+  static const String googleGeminiApiKey = 'YOUR_API_KEY_HERE';
 
   // Flag para cambiar entre IA local y Google Gemini
   static const bool useLocalIA =
