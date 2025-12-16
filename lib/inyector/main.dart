@@ -223,7 +223,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Cargar variables de entorno desde .env
-  await dotenv.load(fileName: '.env');
+  try {
+    await dotenv.load(fileName: '.env');
+    print('✅ .env cargado correctamente');
+    final apiKey = dotenv.env['GOOGLE_GEMINI_API_KEY'];
+    print('🔑 API Key cargada: ${apiKey?.substring(0, 15)}...');
+  } catch (e) {
+    print('⚠️ Error cargando .env: $e');
+  }
 
   // Inicializar sqflite para plataformas de escritorio (no en web)
   if (!kIsWeb) {

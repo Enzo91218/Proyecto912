@@ -19,6 +19,7 @@ class ChatIAGoogleGemini implements RepositorioChatIA {
 
   void _validarYInicializarModelo() {
     print('🔍 Validando API key de Gemini...');
+    print('   API Key recibida: ${apiKey.substring(0, 15)}...');
     if (apiKey.isEmpty) {
       print('⚠️ API key está vacía');
       throw Exception('API key de Google Gemini no configurada');
