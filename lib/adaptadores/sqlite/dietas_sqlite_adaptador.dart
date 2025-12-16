@@ -59,4 +59,45 @@ class RepositorioDeDietasSqlite implements RepositorioDeDietas {
 
     return dietas;
   }
+
+  @override
+  Future<List<Dieta>> obtenerTodasLasDietas() async {
+    final db = await _provider.database;
+    final dietasData = await db.query('dietas');
+
+    final dietas = <Dieta>[];
+    for (final dieta in dietasData) {
+      final dietaId = dieta['id'] as String;
+      final recetasRelacionadas = await db.query(
+        'dieta_recetas',
+        where: 'dieta_id = ?',
+        whereArgs: [dietaId],
+      );
+      final recetasIds = recetasRelacionadas.map((r) => r['receta_id'] as String).toList();
+      final recetas = <Ingrediente>[];
+      for (final recetaId in recetasIds) {
+        final recetaRow = await db.query(
+          'recetas',
+          where: 'id = ?',
+          whereArgs: [recetaId],
+          limit: 1,
+        );
+        if (recetaRow.isNotEmpty) {
+          final receta = await _recetasRepositorio.mapearReceta(recetaRow.first, db);
+          recetas.addAll(receta.ingredientes);
+        }
+      }
+
+      dietas.add(
+        Dieta(
+          id: dietaId,
+          nombre: dieta['nombre'] as String,
+          recetasIds: recetasIds,
+          ingredientes: recetas,
+        ),
+      );
+    }
+
+    return dietas;
+  }
 }

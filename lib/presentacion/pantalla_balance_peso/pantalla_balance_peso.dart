@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../dominio/entidades/balance_peso_altura.dart';
@@ -12,65 +13,90 @@ class PantallaBalancePeso extends StatefulWidget {
 }
 
 class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
+  late FocusNode _keyboardFocusNode;
+
   @override
   void initState() {
     super.initState();
+    _keyboardFocusNode = FocusNode();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BalancePesoCubit>().cargar();
     });
   }
 
   @override
+  void dispose() {
+    _keyboardFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/'),
-          tooltip: 'Volver al menú',
-        ),
-        title: const Text("Balance de Peso y Hidratación"),
-      ),
-      body: BlocBuilder<BalancePesoCubit, BalancePesoState>(
-        builder: (context, state) {
-          if (state is BalancePesoInicial) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is BalancePesoCargado) {
-            final balance = state.balance;
-            
-            // Calcular hidratación basada en el peso ACTUAL (del último registro)
-            final pesoActualBalance = balance.pesoActual;
-            final aguaDiariaML = (pesoActualBalance * 35).toInt();
-            final aguaDiariaL = (aguaDiariaML / 1000).toStringAsFixed(2);
-            final vasosPorDia = (aguaDiariaML / 250).toStringAsFixed(1);
-            
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Tarjeta de datos actuales
-                  _buildDatosActualesCard(balance),
-                  const SizedBox(height: 16),
-                  
-                  // Sección de Hidratación
-                  _buildSeccionHidratacion(pesoActualBalance, aguaDiariaML, aguaDiariaL, vasosPorDia),
-                  const SizedBox(height: 16),
-                  
-                  // Gráfica simple de progreso de peso
-                  _buildGraficaPeso(balance),
-                  const SizedBox(height: 16),
-                  
-                  // Historial de registros
-                  _buildHistorialRegistros(balance),
-                ],
-              ),
-            );
-          } else if (state is BalancePesoError) {
-            return Center(child: Text('Error: ${state.mensaje}'));
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          context.go('/');
+        }
+      },
+      child: RawKeyboardListener(
+        focusNode: _keyboardFocusNode,
+        onKey: (event) {
+          if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+            context.go('/');
           }
-          return const SizedBox();
         },
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.go('/'),
+              tooltip: 'Volver al menú',
+            ),
+            title: const Text("Balance de Peso y Hidratación"),
+          ),
+          body: BlocBuilder<BalancePesoCubit, BalancePesoState>(
+            builder: (context, state) {
+              if (state is BalancePesoInicial) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is BalancePesoCargado) {
+                final balance = state.balance;
+                
+                // Calcular hidratación basada en el peso ACTUAL (del último registro)
+                final pesoActualBalance = balance.pesoActual;
+                final aguaDiariaML = (pesoActualBalance * 35).toInt();
+                final aguaDiariaL = (aguaDiariaML / 1000).toStringAsFixed(2);
+                final vasosPorDia = (aguaDiariaML / 250).toStringAsFixed(1);
+                
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Tarjeta de datos actuales
+                      _buildDatosActualesCard(balance),
+                      const SizedBox(height: 16),
+                      
+                      // Sección de Hidratación
+                      _buildSeccionHidratacion(pesoActualBalance, aguaDiariaML, aguaDiariaL, vasosPorDia),
+                      const SizedBox(height: 16),
+                      
+                      // Gráfica simple de progreso de peso
+                      _buildGraficaPeso(balance),
+                      const SizedBox(height: 16),
+                      
+                      // Historial de registros
+                      _buildHistorialRegistros(balance),
+                    ],
+                  ),
+                );
+              } else if (state is BalancePesoError) {
+                return Center(child: Text('Error: ${state.mensaje}'));
+              }
+              return const SizedBox();
+            },
+          ),
+        ),
       ),
     );
   }

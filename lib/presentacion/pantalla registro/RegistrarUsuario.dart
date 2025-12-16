@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -20,6 +21,41 @@ class _PantallaRegistrarUsuarioState extends State<PantallaRegistrarUsuario> {
   final edadCtrl = TextEditingController();
   final pesoCtrl = TextEditingController();
   final alturaCtrl = TextEditingController();
+  
+  late FocusNode nombreFocus;
+  late FocusNode emailFocus;
+  late FocusNode passFocus;
+  late FocusNode edadFocus;
+  late FocusNode pesoFocus;
+  late FocusNode alturaFocus;
+  
+  @override
+  void initState() {
+    super.initState();
+    nombreFocus = FocusNode();
+    emailFocus = FocusNode();
+    passFocus = FocusNode();
+    edadFocus = FocusNode();
+    pesoFocus = FocusNode();
+    alturaFocus = FocusNode();
+  }
+  
+  @override
+  void dispose() {
+    nombreCtrl.dispose();
+    emailCtrl.dispose();
+    passCtrl.dispose();
+    edadCtrl.dispose();
+    pesoCtrl.dispose();
+    alturaCtrl.dispose();
+    nombreFocus.dispose();
+    emailFocus.dispose();
+    passFocus.dispose();
+    edadFocus.dispose();
+    pesoFocus.dispose();
+    alturaFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,36 +74,66 @@ class _PantallaRegistrarUsuarioState extends State<PantallaRegistrarUsuario> {
             children: [
               TextField(
                 controller: nombreCtrl,
+                focusNode: nombreFocus,
+                onSubmitted: (_) {
+                  nombreFocus.unfocus();
+                  FocusScope.of(context).requestFocus(emailFocus);
+                },
                 decoration: const InputDecoration(labelText: 'Nombre'),
               ),
               const SizedBox(height: 10),
               TextField(
                 controller: emailCtrl,
+                focusNode: emailFocus,
+                onSubmitted: (_) {
+                  emailFocus.unfocus();
+                  FocusScope.of(context).requestFocus(passFocus);
+                },
                 decoration: const InputDecoration(labelText: 'Email'),
               ),
               const SizedBox(height: 10),
               TextField(
                 controller: passCtrl,
+                focusNode: passFocus,
+                onSubmitted: (_) {
+                  passFocus.unfocus();
+                  FocusScope.of(context).requestFocus(edadFocus);
+                },
                 decoration: const InputDecoration(labelText: 'Contraseña'),
                 obscureText: true,
               ),
               const SizedBox(height: 10),
               TextField(
                 controller: edadCtrl,
-                decoration: const InputDecoration(labelText: 'Edad'),
+                focusNode: edadFocus,
                 keyboardType: TextInputType.number,
+                onSubmitted: (_) {
+                  edadFocus.unfocus();
+                  FocusScope.of(context).requestFocus(pesoFocus);
+                },
+                decoration: const InputDecoration(labelText: 'Edad'),
               ),
               const SizedBox(height: 10),
               TextField(
                 controller: pesoCtrl,
-                decoration: const InputDecoration(labelText: 'Peso (kg)'),
+                focusNode: pesoFocus,
                 keyboardType: TextInputType.number,
+                onSubmitted: (_) {
+                  pesoFocus.unfocus();
+                  FocusScope.of(context).requestFocus(alturaFocus);
+                },
+                decoration: const InputDecoration(labelText: 'Peso (kg)'),
               ),
               const SizedBox(height: 10),
               TextField(
                 controller: alturaCtrl,
-                decoration: const InputDecoration(labelText: 'Altura (cm)'),
+                focusNode: alturaFocus,
                 keyboardType: TextInputType.number,
+                onSubmitted: (_) {
+                  // En el último campo, desenfoca y sube el teclado
+                  alturaFocus.unfocus();
+                },
+                decoration: const InputDecoration(labelText: 'Altura (cm)'),
               ),
               const SizedBox(height: 20),
               BlocConsumer<RegistrarCubit, RegistrarState>(

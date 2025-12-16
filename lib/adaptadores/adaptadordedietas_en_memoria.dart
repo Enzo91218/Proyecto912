@@ -40,4 +40,9 @@ class RepositorioDeDietasA implements RepositorioDeDietas {
 
     return todas;
   }
+
+  @override
+  Future<List<Dieta>> obtenerTodasLasDietas() async {
+    return dietasConIngredientes([]);
+  }
 }

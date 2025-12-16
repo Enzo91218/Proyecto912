@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:io';
@@ -13,13 +14,20 @@ class PantallaLogin extends StatefulWidget {
 }
 
 class _PantallaLoginState extends State<PantallaLogin> {
+  late FocusNode emailFocus;
+  late FocusNode passFocus;
+  
   @override
   void initState() {
     super.initState();
+    emailFocus = FocusNode();
+    passFocus = FocusNode();
   }
 
   @override
   void dispose() {
+    emailFocus.dispose();
+    passFocus.dispose();
     super.dispose();
   }
 
@@ -77,6 +85,11 @@ class _PantallaLoginState extends State<PantallaLogin> {
                     const SizedBox(height: 30),
                     TextField(
                       controller: emailCtrl,
+                      focusNode: emailFocus,
+                      onSubmitted: (_) {
+                        emailFocus.unfocus();
+                        FocusScope.of(context).requestFocus(passFocus);
+                      },
                       decoration: InputDecoration(
                         labelText: 'Email',
                         labelStyle: const TextStyle(color: Colors.white70),
@@ -99,6 +112,23 @@ class _PantallaLoginState extends State<PantallaLogin> {
                     const SizedBox(height: 15),
                     TextField(
                       controller: passCtrl,
+                      focusNode: passFocus,
+                      onSubmitted: (_) {
+                        passFocus.unfocus();
+                        // Trigger login
+                        if (emailCtrl.text.isEmpty || passCtrl.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Completa todos los campos'),
+                            ),
+                          );
+                          return;
+                        }
+                        context.read<LoginCubit>().login(
+                          emailCtrl.text,
+                          passCtrl.text,
+                        );
+                      },
                       decoration: InputDecoration(
                         labelText: 'Contraseña',
                         labelStyle: const TextStyle(color: Colors.white70),

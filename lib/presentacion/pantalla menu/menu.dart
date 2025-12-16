@@ -107,6 +107,15 @@ class _PantallaMenuState extends State<PantallaMenu> {
                   ),
                   const Divider(height: 24),
                   _OptionButton(
+                    icon: Icons.chat,
+                    label: 'Chat Recetas',
+                    onTap: () {
+                      Navigator.pop(context);
+                      // Navegar a chat sin receta específica (seleccionar primero)
+                      context.go('/recetas');
+                    },
+                  ),
+                  _OptionButton(
                     icon: Icons.add,
                     label: 'Publicar Receta',
                     onTap: () {

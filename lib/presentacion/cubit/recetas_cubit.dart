@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import '../../aplicacion/casos_de_uso/buscar_recetas.dart';
 import '../../aplicacion/casos_de_uso/filtrar_recetas_por_cultura.dart';
+import '../../aplicacion/casos_de_uso/buscar_recetas_con_gemini.dart';
 import '../../dominio/entidades/receta.dart';
 import '../../dominio/entidades/ingrediente.dart';
 
@@ -13,11 +14,15 @@ class RecetaAleatoriaLoaded extends RecetasState {
 
 class RecetasInitial extends RecetasState {}
 
-class RecetasLoading extends RecetasState {}
+class RecetasLoading extends RecetasState {
+  final bool usandoGemini;
+  RecetasLoading({this.usandoGemini = false});
+}
 
 class RecetasLoaded extends RecetasState {
   final List<Receta> recetas;
-  RecetasLoaded(this.recetas);
+  final bool fueDesdeBD;
+  RecetasLoaded(this.recetas, {this.fueDesdeBD = true});
 }
 
 class CulturasLoaded extends RecetasState {
@@ -33,8 +38,9 @@ class RecetasError extends RecetasState {
 class RecetasCubit extends Cubit<RecetasState> {
   final BuscarRecetas casoUso;
   final FiltrarRecetasPorCultura filtrarPorCultura;
+  final BuscarRecetasConGemini buscarConGemini;
   
-  RecetasCubit(this.casoUso, this.filtrarPorCultura) : super(RecetasInitial());
+  RecetasCubit(this.casoUso, this.filtrarPorCultura, this.buscarConGemini) : super(RecetasInitial());
 
   Future<void> cargar() async {
     emit(RecetasLoading());
@@ -98,6 +104,36 @@ class RecetasCubit extends Cubit<RecetasState> {
       }
     } catch (e) {
       emit(RecetasError('Error al obtener receta aleatoria: $e'));
+    }
+  }
+
+  /// Busca recetas localmente y si no encuentra, usa Gemini para encontrar nuevas
+  Future<void> buscarConFallbackGemini(List<Ingrediente> ingredientes) async {
+    emit(RecetasLoading(usandoGemini: false));
+    try {
+      // Primero intenta búsqueda local
+      final recetasLocales = await casoUso.call(ingredientes);
+      
+      if (recetasLocales.isNotEmpty) {
+        emit(RecetasLoaded(recetasLocales, fueDesdeBD: true));
+        return;
+      }
+
+      // Si no hay resultados, usar Gemini
+      print('\n🔍 No hay recetas locales, usando Gemini...');
+      emit(RecetasLoading(usandoGemini: true));
+      
+      final recetasGemini = await buscarConGemini.buscar(ingredientes);
+      
+      if (recetasGemini.isNotEmpty) {
+        emit(RecetasLoaded(recetasGemini, fueDesdeBD: false));
+      } else {
+        emit(RecetasError(
+          'No se encontraron recetas para los ingredientes: ${ingredientes.map((i) => i.nombre).join(", ")}',
+        ));
+      }
+    } catch (e) {
+      emit(RecetasError('Error en búsqueda: $e'));
     }
   }
 }

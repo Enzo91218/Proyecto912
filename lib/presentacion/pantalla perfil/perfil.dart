@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
@@ -19,11 +20,19 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
   final ImagePicker _imagePicker = ImagePicker();
   File? _imagenPerfil;
   bool _cargando = false;
+  late FocusNode _keyboardFocusNode;
 
   @override
   void initState() {
     super.initState();
+    _keyboardFocusNode = FocusNode();
     _cargarImagenGuardada();
+  }
+
+  @override
+  void dispose() {
+    _keyboardFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _cargarImagenGuardada() async {
@@ -228,20 +237,34 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
     final usuario = usuarioActual.usuario;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mi Perfil'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/'),
-          tooltip: 'Volver al menú',
-        ),
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          context.go('/');
+        }
+      },
+      child: RawKeyboardListener(
+        focusNode: _keyboardFocusNode,
+        onKey: (event) {
+          if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+            context.go('/');
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Mi Perfil'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.go('/'),
+              tooltip: 'Volver al menú',
+            ),
+            elevation: 0,
+            centerTitle: true,
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
             // Sección de Foto de Perfil
             SizedBox(
               height: 250,
@@ -480,6 +503,8 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
 
             const SizedBox(height: 32),
           ],
+        ),
+      ),
         ),
       ),
     );

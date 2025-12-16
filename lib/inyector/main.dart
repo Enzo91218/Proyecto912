@@ -15,6 +15,7 @@ import '../dominio/repositorios/repositorio_de_usuario.dart';
 import '../dominio/repositorios/repositorio_de_registroIMC.dart';
 import '../dominio/repositorios/repositorio_de_registro_peso_altura.dart';
 import '../dominio/repositorios/repositorio_de_rutinas.dart';
+import '../dominio/repositorios/repositorio_chat_ia.dart';
 
 import '../adaptadores/sqlite/database_provider.dart';
 import '../adaptadores/sqlite/recetas_sqlite_adaptador.dart';
@@ -23,6 +24,9 @@ import '../adaptadores/sqlite/usuarios_sqlite_adaptador.dart';
 import '../adaptadores/sqlite/registros_imc_sqlite_adaptador.dart';
 import '../adaptadores/sqlite/registros_peso_altura_sqlite_adaptador.dart';
 import '../adaptadores/sqlite/rutinas_sqlite_adaptador.dart';
+
+import '../adaptadores/sqlite/chat_ia_google_gemini.dart';
+import '../config/app_config.dart';
 
 // Importar casos de uso reales
 import '../aplicacion/casos_de_uso/mostrar_receta_aleatoria.dart';
@@ -38,6 +42,9 @@ import '../aplicacion/casos_de_uso/registro_peso_altura.dart';
 import '../aplicacion/casos_de_uso/balance_peso_altura.dart';
 import '../aplicacion/casos_de_uso/cerrar_sesion.dart';
 import '../aplicacion/casos_de_uso/obtener_rutinas.dart';
+import '../aplicacion/casos_de_uso/obtener_respuesta_ia_caso_de_uso.dart';
+import '../aplicacion/casos_de_uso/buscar_recetas_con_gemini.dart';
+import '../aplicacion/casos_de_uso/clasificar_recetas_a_dieta.dart';
 import '../presentacion/cubit/recetas_cubit.dart';
 import '../presentacion/cubit/dietas_cubit.dart';
 import '../presentacion/cubit/imc_cubit.dart';
@@ -47,6 +54,7 @@ import '../presentacion/cubit/publicar_receta_cubit.dart';
 import '../presentacion/cubit/rutinas_cubit.dart';
 import '../presentacion/cubit/registro_peso_cubit.dart';
 import '../presentacion/cubit/peso_altura_actual_cubit.dart';
+import '../presentacion/cubit/chat_cubit.dart';
 
 // El registro de casos de uso se realiza con las clases implementadas en aplicacion/casos_de_uso
 
@@ -95,6 +103,12 @@ void setupInyector() {
   );
   getIt.registerLazySingleton<RepositorioDeRutinas>(
     () => RepositorioDeRutinasSqlite(getIt<DatabaseProvider>()),
+  );
+  getIt.registerLazySingleton<RepositorioChatIA>(
+    () => ChatIAGoogleGemini(
+      apiKey: AppConfig.googleGeminiApiKey,
+      databaseProvider: getIt<DatabaseProvider>(),
+    ),
   );
 
   // Casos de uso reales
@@ -150,14 +164,33 @@ void setupInyector() {
   getIt.registerLazySingleton(
     () => ObtenerRutinas(getIt<RepositorioDeRutinas>()),
   );
+  getIt.registerLazySingleton(
+    () => ObtenerRespuestaIACasoDeUso(getIt<RepositorioChatIA>()),
+  );
+  getIt.registerLazySingleton(
+    () => BuscarRecetasConGemini(
+      getIt<RepositorioDeRecetas>(),
+      getIt<RepositorioChatIA>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => ClasificarRecetasADieta(getIt<RepositorioChatIA>()),
+  );
 
   // Cubits (registrar como factory para crear instancias nuevas cuando BlocProvider las pida)
   getIt.registerFactory(
     () =>
-        RecetasCubit(getIt<BuscarRecetas>(), getIt<FiltrarRecetasPorCultura>()),
+        RecetasCubit(
+          getIt<BuscarRecetas>(),
+          getIt<FiltrarRecetasPorCultura>(),
+          getIt<BuscarRecetasConGemini>(),
+        ),
   );
   getIt.registerFactory(() => PublicarRecetaCubit(getIt<PublicarReceta>()));
-  getIt.registerFactory(() => DietasCubit(getIt<BuscarDietas>()));
+  getIt.registerFactory(() => DietasCubit(
+    getIt<BuscarDietas>(),
+    getIt<ClasificarRecetasADieta>(),
+  ));
   getIt.registerFactoryParam<IMCCubit, String, void>(
     (usuarioId, _) => IMCCubit(getIt<CalcularIMC>(), usuarioId: usuarioId),
   );
@@ -179,6 +212,9 @@ void setupInyector() {
     (usuarioId, _) => PesoAlturaActualCubit(
       repositorio: getIt<RepositorioDeRegistroPesoAltura>(),
     ),
+  );
+  getIt.registerFactory(
+    () => ChatCubit(getIt<ObtenerRespuestaIACasoDeUso>()),
   );
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
@@ -19,12 +20,16 @@ class PantallaIMC extends StatefulWidget {
 class _PantallaIMCState extends State<PantallaIMC> {
   final pesoCtrl = TextEditingController();
   final alturaCtrl = TextEditingController();
+  late FocusNode _keyboardFocusNode;
+  late FocusNode _focusNode;
   String resultado = "";
   double? imc;
 
   @override
   void initState() {
     super.initState();
+    _focusNode = FocusNode();
+    _keyboardFocusNode = FocusNode();
     // cargar registros previos
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<IMCCubit>().cargar();
@@ -35,6 +40,8 @@ class _PantallaIMCState extends State<PantallaIMC> {
   void dispose() {
     pesoCtrl.dispose();
     alturaCtrl.dispose();
+    _focusNode.dispose();
+    _keyboardFocusNode.dispose();
     super.dispose();
   }
 
@@ -113,41 +120,60 @@ class _PantallaIMCState extends State<PantallaIMC> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/'),
-          tooltip: 'Volver al menú',
-        ),
-        title: const Text("Calcular IMC"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              TextField(
-                controller: pesoCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: "Peso (kg)",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          context.go('/');
+        }
+      },
+      child: RawKeyboardListener(
+        focusNode: _keyboardFocusNode,
+        onKey: (event) {
+          if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+            context.go('/');
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.go('/'),
+              tooltip: 'Volver al menú',
+            ),
+            title: const Text("Calcular IMC"),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextField(
+                    controller: pesoCtrl,
+                    keyboardType: TextInputType.number,
+                    onSubmitted: (_) => _calcularYGuardar(),
+                    decoration: InputDecoration(
+                      labelText: "Peso (kg)",
+                      hintText: "Presiona Tab o Enter para siguiente campo",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              TextField(
-                controller: alturaCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: "Altura (cm)",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 15),
+                  TextField(
+                    controller: alturaCtrl,
+                    focusNode: _focusNode,
+                    keyboardType: TextInputType.number,
+                    onSubmitted: (_) => _calcularYGuardar(),
+                    decoration: InputDecoration(
+                      labelText: "Altura (cm)",
+                      hintText: "Presiona Enter para calcular",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
-                ),
-              ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
@@ -179,7 +205,9 @@ class _PantallaIMCState extends State<PantallaIMC> {
                 }
                 return const SizedBox.shrink();
               }),
-            ],
+                ],
+              ),
+            ),
           ),
         ),
       ),

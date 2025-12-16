@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
@@ -15,79 +16,103 @@ class PantallaRutinas extends StatefulWidget {
 
 class _PantallaRutinasState extends State<PantallaRutinas> {
   final Map<String, Map<int, bool>> _diasCompletados = {};
+  late FocusNode _keyboardFocusNode;
 
   @override
   void initState() {
     super.initState();
+    _keyboardFocusNode = FocusNode();
     print('🖥️ PantallaRutinas: initState llamado');
+  }
+
+  @override
+  void dispose() {
+    _keyboardFocusNode.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     print('🎨 PantallaRutinas: build llamado');
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Rutinas Alimenticias'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/'),
-        ),
-        centerTitle: true,
-      ),
-      body: BlocBuilder<RutinasCubit, RutinasState>(
-        builder: (context, state) {
-          print('🔄 PantallaRutinas: BlocBuilder llamado - Estado: ${state.runtimeType}');
-          if (state is RutinasLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is RutinasLoaded) {
-            final rutinas = state.rutinas;
-            
-            if (rutinas.isEmpty) {
-              return const Center(
-                child: Text('No hay rutinas alimenticias disponibles'),
-              );
-            }
-
-            for (var rutina in rutinas) {
-              if (!_diasCompletados.containsKey(rutina.id)) {
-                _diasCompletados[rutina.id] = {};
-                for (int dia = 1; dia <= 7; dia++) {
-                  _diasCompletados[rutina.id]![dia] = false;
-                }
-              }
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: rutinas.length,
-              itemBuilder: (context, index) {
-                final rutina = rutinas[index];
-                return _buildRutinaCard(rutina);
-              },
-            );
-          } else if (state is RutinasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    state.mensaje,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context.read<RutinasCubit>().cargar(),
-                    child: const Text('Reintentar'),
-                  ),
-                ],
-              ),
-            );
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          context.go('/');
+        }
+      },
+      child: RawKeyboardListener(
+        focusNode: _keyboardFocusNode,
+        onKey: (event) {
+          if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+            context.go('/');
           }
-          return const Center(child: Text('Cargando rutinas...'));
         },
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Rutinas Alimenticias'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.go('/'),
+            ),
+            centerTitle: true,
+          ),
+          body: BlocBuilder<RutinasCubit, RutinasState>(
+            builder: (context, state) {
+              print('🔄 PantallaRutinas: BlocBuilder llamado - Estado: ${state.runtimeType}');
+              if (state is RutinasLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is RutinasLoaded) {
+                final rutinas = state.rutinas;
+                
+                if (rutinas.isEmpty) {
+                  return const Center(
+                    child: Text('No hay rutinas alimenticias disponibles'),
+                  );
+                }
+
+                for (var rutina in rutinas) {
+                  if (!_diasCompletados.containsKey(rutina.id)) {
+                    _diasCompletados[rutina.id] = {};
+                    for (int dia = 1; dia <= 7; dia++) {
+                      _diasCompletados[rutina.id]![dia] = false;
+                    }
+                  }
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: rutinas.length,
+                  itemBuilder: (context, index) {
+                    final rutina = rutinas[index];
+                    return _buildRutinaCard(rutina);
+                  },
+                );
+              } else if (state is RutinasError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(
+                        state.mensaje,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => context.read<RutinasCubit>().cargar(),
+                        child: const Text('Reintentar'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return const Center(child: Text('Cargando rutinas...'));
+            },
+          ),
+        ),
       ),
     );
   }

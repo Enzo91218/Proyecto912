@@ -110,8 +110,40 @@ class DatabaseProvider {
       
       // SIEMPRE verificar y agregar la columna foto_perfil a usuarios
       await _verificarYAgregarColumnasUsuarios(db);
+
+      // SIEMPRE verificar que la tabla de chat existe
+      await _verificarYCrearTablaChatMensajes(db);
     } catch (e) {
       print('⚠ Error verifying tables: $e');
+    }
+  }
+
+  Future<void> _verificarYCrearTablaChatMensajes(Database db) async {
+    try {
+      final tablas = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='chat_mensajes'",
+      );
+
+      if (tablas.isEmpty) {
+        print('⚠ Tabla chat_mensajes no existe, creándola...');
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS chat_mensajes (
+            id TEXT PRIMARY KEY,
+            receta_id TEXT NOT NULL,
+            usuario_id TEXT NOT NULL,
+            contenido TEXT NOT NULL,
+            es_usuario INTEGER NOT NULL,
+            fecha TEXT NOT NULL,
+            FOREIGN KEY (receta_id) REFERENCES recetas(id) ON DELETE CASCADE,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+          );
+        ''');
+        print('✓ Tabla chat_mensajes creada');
+      } else {
+        print('✓ Tabla chat_mensajes ya existe');
+      }
+    } catch (e) {
+      print('⚠ Error verificando tabla chat_mensajes: $e');
     }
   }
 
@@ -271,6 +303,19 @@ class DatabaseProvider {
         rutina_id TEXT NOT NULL,
         ejercicio TEXT NOT NULL,
         FOREIGN KEY (rutina_id) REFERENCES rutinas(id) ON DELETE CASCADE
+      );
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS chat_mensajes (
+        id TEXT PRIMARY KEY,
+        receta_id TEXT NOT NULL,
+        usuario_id TEXT NOT NULL,
+        contenido TEXT NOT NULL,
+        es_usuario INTEGER NOT NULL,
+        fecha TEXT NOT NULL,
+        FOREIGN KEY (receta_id) REFERENCES recetas(id) ON DELETE CASCADE,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
       );
     ''');
 

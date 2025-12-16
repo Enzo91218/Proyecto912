@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:proyecto/presentacion/cubit/rutinas_cubit.dart';
 
@@ -12,6 +13,7 @@ import 'cubit/registro_peso_cubit.dart';
 import 'cubit/balance_peso_cubit.dart';
 import 'cubit/login_cubit.dart';
 import 'cubit/publicar_receta_cubit.dart';
+import 'cubit/chat_cubit.dart';
 import 'calcularIMC/CalcularIMC.dart';
 import 'pantalla menu/menu.dart';
 import 'pantalla dieta/BuscarDieta.dart';
@@ -26,6 +28,7 @@ import 'pantalla_debug_bd/pantalla_debug_bd.dart';
 import 'pantalla rutina/pantalla_rutinas.dart';
 import 'pantalla receta/publicar_receta.dart';
 import 'pantalla receta/BuscarReceta.dart';
+import 'pantalla_chat_receta/chat_receta_screen.dart';
 import 'pantalla perfil/perfil.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -158,6 +161,31 @@ final GoRouter appRouter = GoRouter(
             create: (_) => inyector.getIt<RutinasCubit>()..cargar(),
             child: const PantallaRutinas(),
           ),
+    ),
+    GoRoute(
+      path: '/chat-receta',
+      name: 'chat-receta',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        final receta = extra?['receta'];
+        final usuarioId = extra?['usuarioId'] ?? GetIt.instance.get<UsuarioActual>().id;
+
+        if (receta == null) {
+          return const Scaffold(
+            body: Center(
+              child: Text('Error: Receta no encontrada'),
+            ),
+          );
+        }
+
+        return BlocProvider(
+          create: (_) => inyector.getIt<ChatCubit>(),
+          child: ChatRecetaScreen(
+            receta: receta,
+            usuarioId: usuarioId,
+          ),
+        );
+      },
     ),
     // RUTAS DE LOGIN Y REGISTRO COMENTADAS - La app inicia directamente en el menú
     /*
