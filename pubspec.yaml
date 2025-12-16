@@ -46,6 +46,7 @@ dependencies:
   uuid: ^4.0.0
   equatable: ^2.0.5
   google_generative_ai: ^0.4.7
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +74,7 @@ flutter:
     - assets/db/proyecto912.db
     - assets/videos/
     - assets/audio/
+    - .env
 
   # To add assets to your application, add an assets section, like this:
   # assets:

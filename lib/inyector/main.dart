@@ -26,6 +26,7 @@ import '../adaptadores/sqlite/registros_peso_altura_sqlite_adaptador.dart';
 import '../adaptadores/sqlite/rutinas_sqlite_adaptador.dart';
 
 import '../adaptadores/sqlite/chat_ia_google_gemini.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../config/app_config.dart';
 
 // Importar casos de uso reales
@@ -220,6 +221,9 @@ void setupInyector() {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Cargar variables de entorno desde .env
+  await dotenv.load(fileName: '.env');
 
   // Inicializar sqflite para plataformas de escritorio (no en web)
   if (!kIsWeb) {
