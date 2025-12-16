@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math' as math;
 import '../../aplicacion/casos_de_uso/obtener_respuesta_ia_caso_de_uso.dart';
 import '../../dominio/entidades/receta.dart';
-import '../../dominio/entidades/mensaje_chat.dart';
+
 import 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
@@ -14,10 +14,7 @@ class ChatCubit extends Cubit<ChatState> {
     try {
       emit(const ChatLoadingState());
       final mensajes = await _obtenerRespuestaIA.obtenerHistorial(recetaId);
-      emit(ChatCargadoState(
-        mensajes: mensajes,
-        recetaId: recetaId,
-      ));
+      emit(ChatCargadoState(mensajes: mensajes, recetaId: recetaId));
     } catch (e) {
       emit(ChatErrorState('Error cargando historial: $e'));
     }
@@ -31,7 +28,9 @@ class ChatCubit extends Cubit<ChatState> {
     try {
       final estadoActual = state;
       if (estadoActual is! ChatCargadoState) {
-        print('❌ Estado actual no es ChatCargadoState: ${estadoActual.runtimeType}');
+        print(
+          '❌ Estado actual no es ChatCargadoState: ${estadoActual.runtimeType}',
+        );
         return;
       }
 
@@ -41,11 +40,13 @@ class ChatCubit extends Cubit<ChatState> {
       print('   Usuario ID: $usuarioId');
 
       // Mostrar estado de carga mientras espera la respuesta
-      emit(ChatCargadoState(
-        mensajes: estadoActual.mensajes,
-        recetaId: receta.id,
-        esperandoRespuesta: true,
-      ));
+      emit(
+        ChatCargadoState(
+          mensajes: estadoActual.mensajes,
+          recetaId: receta.id,
+          esperandoRespuesta: true,
+        ),
+      );
 
       print('✅ Estado actualizado a esperandoRespuesta=true');
       print('⏳ Llamando a caso de uso...');
@@ -61,22 +62,31 @@ class ChatCubit extends Cubit<ChatState> {
       print('📥 Obteniendo historial actualizado...');
 
       // Obtener historial actualizado desde la BD
-      final mensajesFinal = await _obtenerRespuestaIA.obtenerHistorial(receta.id);
+      final mensajesFinal = await _obtenerRespuestaIA.obtenerHistorial(
+        receta.id,
+      );
 
       print('✅ Historial obtenido: ${mensajesFinal.length} mensajes totales');
       for (int i = 0; i < mensajesFinal.length; i++) {
         final m = mensajesFinal[i];
-        final preview = m.contenido.substring(0, math.min(50, m.contenido.length));
-        print('   [$i] ${m.esUsuario ? "👤 Usuario" : "🤖 IA"}: $preview${m.contenido.length > 50 ? "..." : ""}');
+        final preview = m.contenido.substring(
+          0,
+          math.min(50, m.contenido.length),
+        );
+        print(
+          '   [$i] ${m.esUsuario ? "👤 Usuario" : "🤖 IA"}: $preview${m.contenido.length > 50 ? "..." : ""}',
+        );
       }
 
       // Emitir estado final sin espera
-      emit(ChatCargadoState(
-        mensajes: mensajesFinal,
-        recetaId: receta.id,
-        esperandoRespuesta: false,
-      ));
-      
+      emit(
+        ChatCargadoState(
+          mensajes: mensajesFinal,
+          recetaId: receta.id,
+          esperandoRespuesta: false,
+        ),
+      );
+
       print('✅ Chat actualizado correctamente');
       print('===== FIN ENVÍO DE MENSAJE =====\n');
     } catch (e) {

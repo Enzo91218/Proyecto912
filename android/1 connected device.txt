@@ -1,0 +1,2 @@
+1 connected device
+SM-A205F (mobile) • emulator-5554 • android • Android 9

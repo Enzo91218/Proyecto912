@@ -32,20 +32,16 @@ class RepositorioDeUsuarioSqlite implements RepositorioDeUsuario {
   @override
   Future<void> agregarUsuario(Usuario usuario) async {
     final db = await _provider.database;
-    await db.insert(
-      'usuarios',
-      {
-        'id': usuario.id,
-        'nombre': usuario.nombre,
-        'email': usuario.email,
-        'password': usuario.password,
-        'edad': usuario.edad,
-        'peso': usuario.peso,
-        'altura': usuario.altura,
-        'foto_perfil': usuario.fotoPerfil,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('usuarios', {
+      'id': usuario.id,
+      'nombre': usuario.nombre,
+      'email': usuario.email,
+      'password': usuario.password,
+      'edad': usuario.edad,
+      'peso': usuario.peso,
+      'altura': usuario.altura,
+      'foto_perfil': usuario.fotoPerfil,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override

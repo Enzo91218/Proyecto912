@@ -30,7 +30,7 @@ class DietasError extends DietasState {
 class DietasCubit extends Cubit<DietasState> {
   final BuscarDietas casoUso;
   final ClasificarRecetasADieta clasificador;
-  
+
   DietasCubit(this.casoUso, this.clasificador) : super(DietasInitial());
 
   Future<void> cargarDietasDisponibles() async {
@@ -58,14 +58,16 @@ class DietasCubit extends Cubit<DietasState> {
     try {
       // Obtener recetas de la dieta seleccionada
       final recetas = await casoUso.call(dieta.nombre);
-      
+
       // Clasificar cada receta a su dieta correspondiente usando Gemini
       final clasificaciones = await clasificador.clasificarMultiplesRecetas(
         recetas,
         todasLasDietas,
       );
-      
-      emit(DietasLoaded(recetas, dieta.nombre, clasificaciones: clasificaciones));
+
+      emit(
+        DietasLoaded(recetas, dieta.nombre, clasificaciones: clasificaciones),
+      );
     } catch (e) {
       emit(DietasError(e.toString()));
     }

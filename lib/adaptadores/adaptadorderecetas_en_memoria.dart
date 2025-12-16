@@ -1,4 +1,3 @@
-
 import '../dominio/entidades/receta.dart';
 import '../dominio/entidades/ingrediente.dart';
 import '../dominio/repositorios/repositorio_de_recetas.dart';
@@ -13,7 +12,11 @@ class RepositorioDeRecetasA implements RepositorioDeRecetas {
         Ingrediente(id: '1', nombre: 'Tomate', cantidad: '2 unidades'),
         Ingrediente(id: '2', nombre: 'Lechuga', cantidad: '1 unidad'),
         Ingrediente(id: '3', nombre: 'Cebolla', cantidad: '1/2 unidad'),
-        Ingrediente(id: '4', nombre: 'Aceite de oliva', cantidad: '1 cucharada'),
+        Ingrediente(
+          id: '4',
+          nombre: 'Aceite de oliva',
+          cantidad: '1 cucharada',
+        ),
       ],
       cultura: 'Mediterránea',
     ),
@@ -49,11 +52,14 @@ class RepositorioDeRecetasA implements RepositorioDeRecetas {
   }
 
   @override
-  Future<List<Receta>> recetasConIngredientes(List<Ingrediente> ingredientes) async {
+  Future<List<Receta>> recetasConIngredientes(
+    List<Ingrediente> ingredientes,
+  ) async {
     if (ingredientes.isEmpty) return _recetas;
     final buscados = ingredientes.map((i) => i.nombre.toLowerCase()).toList();
     return _recetas.where((r) {
-      final nombres = r.ingredientes.map((i) => i.nombre.toLowerCase()).toList();
+      final nombres =
+          r.ingredientes.map((i) => i.nombre.toLowerCase()).toList();
       return buscados.every((b) => nombres.contains(b));
     }).toList();
   }
@@ -62,7 +68,7 @@ class RepositorioDeRecetasA implements RepositorioDeRecetas {
   Future<void> agregarReceta(Receta receta) async {
     _recetas.add(receta);
   }
-  
+
   @override
   Future<Receta?> obtenerRecetaAleatoria() async {
     if (_recetas.isEmpty) return null;

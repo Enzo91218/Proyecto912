@@ -9,8 +9,7 @@ class ChatIASqliteAdaptador implements RepositorioChatIA {
   final DatabaseProvider _databaseProvider;
   final ChatIAEnMemoria _iaLocal; // Para las respuestas inteligentes
 
-  ChatIASqliteAdaptador(this._databaseProvider)
-      : _iaLocal = ChatIAEnMemoria();
+  ChatIASqliteAdaptador(this._databaseProvider) : _iaLocal = ChatIAEnMemoria();
 
   @override
   Future<String> obtenerRespuesta(String pregunta, Receta receta) async {

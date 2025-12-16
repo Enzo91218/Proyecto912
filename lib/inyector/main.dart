@@ -26,7 +26,6 @@ import '../adaptadores/sqlite/registros_peso_altura_sqlite_adaptador.dart';
 import '../adaptadores/sqlite/rutinas_sqlite_adaptador.dart';
 
 import '../adaptadores/sqlite/chat_ia_google_gemini.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../config/app_config.dart';
 
 // Importar casos de uso reales
@@ -180,18 +179,16 @@ void setupInyector() {
 
   // Cubits (registrar como factory para crear instancias nuevas cuando BlocProvider las pida)
   getIt.registerFactory(
-    () =>
-        RecetasCubit(
-          getIt<BuscarRecetas>(),
-          getIt<FiltrarRecetasPorCultura>(),
-          getIt<BuscarRecetasConGemini>(),
-        ),
+    () => RecetasCubit(
+      getIt<BuscarRecetas>(),
+      getIt<FiltrarRecetasPorCultura>(),
+      getIt<BuscarRecetasConGemini>(),
+    ),
   );
   getIt.registerFactory(() => PublicarRecetaCubit(getIt<PublicarReceta>()));
-  getIt.registerFactory(() => DietasCubit(
-    getIt<BuscarDietas>(),
-    getIt<ClasificarRecetasADieta>(),
-  ));
+  getIt.registerFactory(
+    () => DietasCubit(getIt<BuscarDietas>(), getIt<ClasificarRecetasADieta>()),
+  );
   getIt.registerFactoryParam<IMCCubit, String, void>(
     (usuarioId, _) => IMCCubit(getIt<CalcularIMC>(), usuarioId: usuarioId),
   );
@@ -214,23 +211,11 @@ void setupInyector() {
       repositorio: getIt<RepositorioDeRegistroPesoAltura>(),
     ),
   );
-  getIt.registerFactory(
-    () => ChatCubit(getIt<ObtenerRespuestaIACasoDeUso>()),
-  );
+  getIt.registerFactory(() => ChatCubit(getIt<ObtenerRespuestaIACasoDeUso>()));
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Cargar variables de entorno desde .env
-  try {
-    await dotenv.load(fileName: '.env');
-    print('✅ .env cargado correctamente');
-    final apiKey = dotenv.env['GOOGLE_GEMINI_API_KEY'];
-    print('🔑 API Key cargada: ${apiKey?.substring(0, 15)}...');
-  } catch (e) {
-    print('⚠️ Error cargando .env: $e');
-  }
 
   // Inicializar sqflite para plataformas de escritorio (no en web)
   if (!kIsWeb) {

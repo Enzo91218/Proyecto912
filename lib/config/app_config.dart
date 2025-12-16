@@ -1,24 +1,16 @@
 /// Archivo de configuración para API keys y constantes sensibles
-/// Las API keys se cargan desde .env para protegerlas
-
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+/// IMPORTANTE: Reemplaza YOUR_API_KEY_HERE con tu propia API key de Gemini
+/// UPDATED: Recompilación forzada
 
 class AppConfig {
-  /// Obtiene la API key de Google Gemini desde variables de entorno
-  /// Asegúrate de tener .env con: GOOGLE_GEMINI_API_KEY=tu_api_key
-  static String get googleGeminiApiKey {
-    final apiKey = dotenv.env['GOOGLE_GEMINI_API_KEY'];
-    if (apiKey == null || apiKey.isEmpty) {
-      throw Exception(
-        'GOOGLE_GEMINI_API_KEY no configurada en .env. '
-        'Copia .env.example a .env y agrega tu API key.',
-      );
-    }
-    return apiKey;
-  }
+  // Google Gemini API Key
+  // Obtén tu API key en: https://aistudio.google.com/app/apikey
+  // Reemplaza "YOUR_API_KEY_HERE" con tu propia key
+  static const String googleGeminiApiKey = 'AIzaSyCfy3CaFehvQj9DwBiHRZw2bOaO5sSToaU';
 
   // Flag para cambiar entre IA local y Google Gemini
-  static const bool useLocalIA = false; // Cambiar a true para usar respuestas locales
+  static const bool useLocalIA =
+      false; // Cambiar a true para usar respuestas locales
 
   // Otros ajustes
   static const Duration requestTimeout = Duration(seconds: 60);

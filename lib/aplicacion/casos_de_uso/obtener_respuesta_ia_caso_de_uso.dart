@@ -14,7 +14,7 @@ class ObtenerRespuestaIACasoDeUso {
     required String usuarioId,
   }) async {
     print('\n📝 ===== EJECUTAR CASO DE USO =====');
-    
+
     // 1. Guardar pregunta del usuario
     print('1️⃣  Guardando mensaje del usuario...');
     final mensajeUsuario = MensajeChat(
@@ -30,9 +30,13 @@ class ObtenerRespuestaIACasoDeUso {
 
     // 2. Obtener respuesta de IA
     print('2️⃣  Obteniendo respuesta de IA...');
-    final contenidoRespuesta =
-        await _repositorioChatIA.obtenerRespuesta(pregunta, receta);
-    print('   ✅ Respuesta de IA obtenida (${contenidoRespuesta.length} caracteres)');
+    final contenidoRespuesta = await _repositorioChatIA.obtenerRespuesta(
+      pregunta,
+      receta,
+    );
+    print(
+      '   ✅ Respuesta de IA obtenida (${contenidoRespuesta.length} caracteres)',
+    );
 
     // 3. Guardar respuesta de IA
     print('3️⃣  Guardando respuesta de IA...');

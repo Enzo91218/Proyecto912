@@ -61,13 +61,13 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
                 return const Center(child: CircularProgressIndicator());
               } else if (state is BalancePesoCargado) {
                 final balance = state.balance;
-                
+
                 // Calcular hidratación basada en el peso ACTUAL (del último registro)
                 final pesoActualBalance = balance.pesoActual;
                 final aguaDiariaML = (pesoActualBalance * 35).toInt();
                 final aguaDiariaL = (aguaDiariaML / 1000).toStringAsFixed(2);
                 final vasosPorDia = (aguaDiariaML / 250).toStringAsFixed(1);
-                
+
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -76,15 +76,20 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
                       // Tarjeta de datos actuales
                       _buildDatosActualesCard(balance),
                       const SizedBox(height: 16),
-                      
+
                       // Sección de Hidratación
-                      _buildSeccionHidratacion(pesoActualBalance, aguaDiariaML, aguaDiariaL, vasosPorDia),
+                      _buildSeccionHidratacion(
+                        pesoActualBalance,
+                        aguaDiariaML,
+                        aguaDiariaL,
+                        vasosPorDia,
+                      ),
                       const SizedBox(height: 16),
-                      
+
                       // Gráfica simple de progreso de peso
                       _buildGraficaPeso(balance),
                       const SizedBox(height: 16),
-                      
+
                       // Historial de registros
                       _buildHistorialRegistros(balance),
                     ],
@@ -109,14 +114,29 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Datos Actuales', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Datos Actuales',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildStatItem('Peso', '${balance.pesoActual.toStringAsFixed(1)} kg', Colors.blue),
-                _buildStatItem('Altura', '${balance.alturaActual.toStringAsFixed(2)} cm', Colors.green),
-                _buildStatItem('IMC', balance.imc.toStringAsFixed(1), Colors.orange),
+                _buildStatItem(
+                  'Peso',
+                  '${balance.pesoActual.toStringAsFixed(1)} kg',
+                  Colors.blue,
+                ),
+                _buildStatItem(
+                  'Altura',
+                  '${balance.alturaActual.toStringAsFixed(2)} cm',
+                  Colors.green,
+                ),
+                _buildStatItem(
+                  'IMC',
+                  balance.imc.toStringAsFixed(1),
+                  Colors.orange,
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -141,14 +161,21 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
     );
   }
 
-  Widget _buildSeccionHidratacion(double peso, int mlDiarios, String litrosDiarios, String vasos) {
+  Widget _buildSeccionHidratacion(
+    double peso,
+    int mlDiarios,
+    String litrosDiarios,
+    String vasos,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Plan de Hidratación Personalizado', 
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Plan de Hidratación Personalizado',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
-        
+
         // Card principal de hidratación
         Card(
           elevation: 2,
@@ -157,11 +184,18 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                const Text('Basado en tu peso', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                const Text(
+                  'Basado en tu peso',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
                 const SizedBox(height: 8),
                 Text(
                   '$litrosDiarios L',
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blue),
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -170,7 +204,10 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -185,7 +222,7 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
           ),
         ),
         const SizedBox(height: 12),
-        
+
         // Intervalo recomendado
         Card(
           elevation: 2,
@@ -194,21 +231,30 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Intervalo Recomendado', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Intervalo Recomendado',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
-                const Text('200-300 ml cada 1 hora\n(o cada 45 minutos si haces ejercicio)', 
-                  style: TextStyle(fontSize: 12)),
+                const Text(
+                  '200-300 ml cada 1 hora\n(o cada 45 minutos si haces ejercicio)',
+                  style: TextStyle(fontSize: 12),
+                ),
                 const SizedBox(height: 12),
                 Text(
                   '$vasos vasos de 250 ml por día',
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.blue),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue,
+                  ),
                 ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 12),
-        
+
         // Ejemplo de distribución
         Card(
           elevation: 2,
@@ -217,7 +263,10 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Ejemplo de Distribución', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Ejemplo de Distribución',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
                 _buildHorarioAgua(),
               ],
@@ -230,29 +279,54 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
 
   Widget _buildHorarioAgua() {
     final horarios = [
-      '8:00', '9:00', '10:00', '11:00', '13:00', '15:00', '17:00', '19:00'
+      '8:00',
+      '9:00',
+      '10:00',
+      '11:00',
+      '13:00',
+      '15:00',
+      '17:00',
+      '19:00',
     ];
-    
+
     return Column(
-      children: horarios.map((hora) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(hora, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.water_drop, size: 16, color: Colors.blue),
-            const SizedBox(width: 4),
-            const Text('300 ml', style: TextStyle(fontSize: 12)),
-          ],
-        ),
-      )).toList(),
+      children:
+          horarios
+              .map(
+                (hora) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          hora,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.water_drop,
+                        size: 16,
+                        color: Colors.blue,
+                      ),
+                      const SizedBox(width: 4),
+                      const Text('300 ml', style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ),
+              )
+              .toList(),
     );
   }
 
@@ -260,7 +334,10 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Progreso de Peso', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Progreso de Peso',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         Card(
           elevation: 2,
@@ -271,7 +348,10 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
                 if (balance.puntos.isEmpty)
                   const Padding(
                     padding: EdgeInsets.all(32),
-                    child: Text('No hay registros de peso aún', style: TextStyle(color: Colors.grey)),
+                    child: Text(
+                      'No hay registros de peso aún',
+                      style: TextStyle(color: Colors.grey),
+                    ),
                   )
                 else
                   Column(
@@ -284,12 +364,18 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _buildStatInfo('Peso Inicial', 
-                            '${balance.puntos.first.peso.toStringAsFixed(1)} kg'),
-                          _buildStatInfo('Peso Actual', 
-                            '${balance.puntos.last.peso.toStringAsFixed(1)} kg'),
-                          _buildStatInfo('Diferencia', 
-                            '${(balance.puntos.last.peso - balance.puntos.first.peso).abs().toStringAsFixed(1)} kg'),
+                          _buildStatInfo(
+                            'Peso Inicial',
+                            '${balance.puntos.first.peso.toStringAsFixed(1)} kg',
+                          ),
+                          _buildStatInfo(
+                            'Peso Actual',
+                            '${balance.puntos.last.peso.toStringAsFixed(1)} kg',
+                          ),
+                          _buildStatInfo(
+                            'Diferencia',
+                            '${(balance.puntos.last.peso - balance.puntos.first.peso).abs().toStringAsFixed(1)} kg',
+                          ),
                         ],
                       ),
                     ],
@@ -306,13 +392,19 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Historial de Registros', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Historial de Registros',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         if (balance.puntos.isEmpty)
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('No hay registros aún', style: TextStyle(color: Colors.grey.shade600)),
+              child: Text(
+                'No hay registros aún',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
             ),
           )
         else
@@ -327,8 +419,10 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
                   child: Text('${index + 1}'),
                 ),
                 title: Text('Peso: ${punto.peso.toStringAsFixed(2)} kg'),
-                subtitle: Text('Altura: ${punto.altura.toStringAsFixed(2)} m\n'
-                  '${punto.fecha.day}/${punto.fecha.month}/${punto.fecha.year}'),
+                subtitle: Text(
+                  'Altura: ${punto.altura.toStringAsFixed(2)} m\n'
+                  '${punto.fecha.day}/${punto.fecha.month}/${punto.fecha.year}',
+                ),
               ),
             );
           }).toList(),
@@ -348,7 +442,10 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
           child: Icon(Icons.trending_up, color: color, size: 20),
         ),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
         Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
     );
@@ -357,7 +454,10 @@ class _PantallaBalancePesoState extends State<PantallaBalancePeso> {
   Widget _buildStatInfo(String label, String value) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
     );
@@ -390,10 +490,7 @@ class _CustomLineChart extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return CustomPaint(
-      painter: _LineChartPainter(puntos),
-      size: Size.infinite,
-    );
+    return CustomPaint(painter: _LineChartPainter(puntos), size: Size.infinite);
   }
 }
 
@@ -406,17 +503,20 @@ class _LineChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (puntos.isEmpty) return;
 
-    final paint = Paint()
-      ..color = Colors.blue
-      ..strokeWidth = 2;
+    final paint =
+        Paint()
+          ..color = Colors.blue
+          ..strokeWidth = 2;
 
-    final pointPaint = Paint()
-      ..color = Colors.blue
-      ..strokeWidth = 6;
+    final pointPaint =
+        Paint()
+          ..color = Colors.blue
+          ..strokeWidth = 6;
 
-    final gridPaint = Paint()
-      ..color = Colors.grey.withOpacity(0.2)
-      ..strokeWidth = 0.5;
+    final gridPaint =
+        Paint()
+          ..color = Colors.grey.withOpacity(0.2)
+          ..strokeWidth = 0.5;
 
     // Encontrar min y max de peso
     final pesos = puntos.map((p) => p.peso as double).toList();
@@ -424,7 +524,8 @@ class _LineChartPainter extends CustomPainter {
     final maxPeso = pesos.reduce((a, b) => a > b ? a : b);
     final rango = maxPeso - minPeso;
 
-    final xSpacing = size.width / (puntos.length - 1 > 0 ? puntos.length - 1 : 1);
+    final xSpacing =
+        size.width / (puntos.length - 1 > 0 ? puntos.length - 1 : 1);
     final yPadding = 20.0;
 
     // Dibujar líneas de grid horizontales
@@ -436,17 +537,17 @@ class _LineChartPainter extends CustomPainter {
     // Dibujar puntos y líneas
     for (int i = 0; i < puntos.length; i++) {
       final x = i * xSpacing;
-      final normalizedWeight = rango > 0 
-        ? (pesos[i] - minPeso) / rango 
-        : 0.5;
-      final y = yPadding + (size.height - 2 * yPadding) * (1 - normalizedWeight);
+      final normalizedWeight = rango > 0 ? (pesos[i] - minPeso) / rango : 0.5;
+      final y =
+          yPadding + (size.height - 2 * yPadding) * (1 - normalizedWeight);
 
       if (i < puntos.length - 1) {
         final nextX = (i + 1) * xSpacing;
-        final nextNormalizedWeight = rango > 0
-          ? (pesos[i + 1] - minPeso) / rango
-          : 0.5;
-        final nextY = yPadding + (size.height - 2 * yPadding) * (1 - nextNormalizedWeight);
+        final nextNormalizedWeight =
+            rango > 0 ? (pesos[i + 1] - minPeso) / rango : 0.5;
+        final nextY =
+            yPadding +
+            (size.height - 2 * yPadding) * (1 - nextNormalizedWeight);
 
         canvas.drawLine(Offset(x, y), Offset(nextX, nextY), paint);
       }

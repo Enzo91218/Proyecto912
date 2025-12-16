@@ -493,16 +493,20 @@ class AdaptadorDeRutinasEnMemoria implements RepositorioDeRutinas {
   }
 
   @override
-  Future<void> marcarDiaCompletado(String rutinaId, int dia, bool completada) async {
+  Future<void> marcarDiaCompletado(
+    String rutinaId,
+    int dia,
+    bool completada,
+  ) async {
     // Simular delay de red
     await Future.delayed(const Duration(milliseconds: 300));
-    
+
     // Buscar la rutina por ID
     final rutina = _rutinas.firstWhere(
       (r) => r.id == rutinaId,
       orElse: () => throw Exception('Rutina no encontrada'),
     );
-    
+
     // Marcar todos los alimentos del día como completados
     for (final alimento in rutina.alimentos) {
       if (alimento.dia == dia) {

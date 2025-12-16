@@ -29,7 +29,7 @@ class _ChatRecetaScreenState extends State<ChatRecetaScreen> {
   void initState() {
     super.initState();
     _keyboardFocusNode = FocusNode();
-    
+
     // Cargar historial cuando se abre la pantalla
     context.read<ChatCubit>().cargarHistorial(widget.receta.id);
   }
@@ -92,9 +92,7 @@ class _ChatRecetaScreenState extends State<ChatRecetaScreen> {
         body: BlocBuilder<ChatCubit, ChatState>(
           builder: (context, state) {
             if (state is ChatInitialState) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+              return const Center(child: CircularProgressIndicator());
             }
 
             if (state is ChatErrorState) {
@@ -108,9 +106,10 @@ class _ChatRecetaScreenState extends State<ChatRecetaScreen> {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () =>
-                          context.read<ChatCubit>()
-                              .cargarHistorial(widget.receta.id),
+                      onPressed:
+                          () => context.read<ChatCubit>().cargarHistorial(
+                            widget.receta.id,
+                          ),
                       child: const Text('Reintentar'),
                     ),
                   ],
@@ -123,39 +122,40 @@ class _ChatRecetaScreenState extends State<ChatRecetaScreen> {
                 children: [
                   // Lista de mensajes
                   Expanded(
-                    child: state.mensajes.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.chat,
-                                  size: 48,
-                                  color: Colors.grey[400],
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Inicia una conversación sobre esta receta',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 14,
+                    child:
+                        state.mensajes.isEmpty
+                            ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.chat,
+                                    size: 48,
+                                    color: Colors.grey[400],
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Inicia una conversación sobre esta receta',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                            : ListView.builder(
+                              controller: _scrollController,
+                              padding: const EdgeInsets.all(12),
+                              itemCount: state.mensajes.length,
+                              itemBuilder: (context, index) {
+                                final mensaje = state.mensajes[index];
+                                return _MensajeBubble(
+                                  mensaje: mensaje.contenido,
+                                  esUsuario: mensaje.esUsuario,
+                                );
+                              },
                             ),
-                          )
-                        : ListView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.all(12),
-                            itemCount: state.mensajes.length,
-                            itemBuilder: (context, index) {
-                              final mensaje = state.mensajes[index];
-                              return _MensajeBubble(
-                                mensaje: mensaje.contenido,
-                                esUsuario: mensaje.esUsuario,
-                              );
-                            },
-                          ),
                   ),
                   // Indicador de IA pensando con puntos animados
                   if (state.esperandoRespuesta)
@@ -167,11 +167,7 @@ class _ChatRecetaScreenState extends State<ChatRecetaScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(
-                          color: Colors.grey[300]!,
-                        ),
-                      ),
+                      border: Border(top: BorderSide(color: Colors.grey[300]!)),
                     ),
                     child: Row(
                       children: [
@@ -196,17 +192,21 @@ class _ChatRecetaScreenState extends State<ChatRecetaScreen> {
                         const SizedBox(width: 8),
                         FloatingActionButton(
                           mini: true,
-                          onPressed: state.esperandoRespuesta ? null : _enviarMensaje,
-                          child: state.esperandoRespuesta
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation(Colors.white),
-                                  ),
-                                )
-                              : const Icon(Icons.send),
+                          onPressed:
+                              state.esperandoRespuesta ? null : _enviarMensaje,
+                          child:
+                              state.esperandoRespuesta
+                                  ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                  : const Icon(Icons.send),
                         ),
                       ],
                     ),
@@ -215,9 +215,7 @@ class _ChatRecetaScreenState extends State<ChatRecetaScreen> {
               );
             }
 
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           },
         ),
       ),
@@ -229,10 +227,7 @@ class _MensajeBubble extends StatelessWidget {
   final String mensaje;
   final bool esUsuario;
 
-  const _MensajeBubble({
-    required this.mensaje,
-    required this.esUsuario,
-  });
+  const _MensajeBubble({required this.mensaje, required this.esUsuario});
 
   @override
   Widget build(BuildContext context) {
@@ -248,10 +243,7 @@ class _MensajeBubble extends StatelessWidget {
           color: esUsuario ? Colors.blue[100] : Colors.grey[200],
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Text(
-          mensaje,
-          style: const TextStyle(fontSize: 14),
-        ),
+        child: Text(mensaje, style: const TextStyle(fontSize: 14)),
       ),
     );
   }

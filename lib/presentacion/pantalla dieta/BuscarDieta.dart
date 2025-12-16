@@ -57,16 +57,20 @@ class _PantallaDietasState extends State<PantallaDietas> {
                     children: [
                       const Text(
                         'Selecciona una dieta:',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 20),
                       Expanded(
                         child: GridView.builder(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                          ),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                              ),
                           itemCount: state.dietas.length,
                           itemBuilder: (context, index) {
                             final dieta = state.dietas[index];
@@ -133,16 +137,22 @@ class _PantallaDietasState extends State<PantallaDietas> {
                               IconButton(
                                 icon: const Icon(Icons.close),
                                 onPressed: () {
-                                  context.read<DietasCubit>().cargarDietasDisponibles();
+                                  context
+                                      .read<DietasCubit>()
+                                      .cargarDietasDisponibles();
                                 },
                                 tooltip: 'Volver a seleccionar dieta',
                               ),
                             ],
                           ),
-                          if (state.clasificaciones != null && state.clasificaciones!.isNotEmpty)
+                          if (state.clasificaciones != null &&
+                              state.clasificaciones!.isNotEmpty)
                             Text(
                               'Gemini clasificó ${state.clasificaciones!.length} recetas',
-                              style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontStyle: FontStyle.italic,
+                              ),
                             ),
                         ],
                       ),
@@ -152,10 +162,14 @@ class _PantallaDietasState extends State<PantallaDietas> {
                         itemCount: state.recetas.length,
                         itemBuilder: (context, index) {
                           final receta = state.recetas[index];
-                          final dietaClasificada = state.clasificaciones?[receta];
-                          
+                          final dietaClasificada =
+                              state.clasificaciones?[receta];
+
                           return Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                             child: ListTile(
                               title: Text(receta.titulo),
                               subtitle: Column(

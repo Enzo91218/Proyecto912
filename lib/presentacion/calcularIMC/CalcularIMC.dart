@@ -60,9 +60,9 @@ class _PantallaIMCState extends State<PantallaIMC> {
     final usuario = usuarioActual.usuario;
 
     if (usuario == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Usuario no autenticado')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Usuario no autenticado')));
       return;
     }
 
@@ -80,7 +80,9 @@ class _PantallaIMCState extends State<PantallaIMC> {
       categoria = "Obesidad";
     }
 
-    print('💾 Calculando y guardando: peso=$peso, altura=$altura, imc=$imcValue, categoría=$categoria');
+    print(
+      '💾 Calculando y guardando: peso=$peso, altura=$altura, imc=$imcValue, categoría=$categoria',
+    );
 
     // Guardar en registros_peso_altura
     await context.read<RegistroPesoCubit>().agregarRegistro(
@@ -90,14 +92,19 @@ class _PantallaIMCState extends State<PantallaIMC> {
     );
 
     // Guardar en registros_imc
-    await context.read<IMCCubit>().guardarRegistro(usuario.id, imcValue, categoria);
+    await context.read<IMCCubit>().guardarRegistro(
+      usuario.id,
+      imcValue,
+      categoria,
+    );
 
     // Notificar que la BD fue actualizada
     GetIt.instance.get<DatabaseUpdateService>().recordUpdate();
 
     // Mostrar resultado
     setState(() {
-      resultado = "IMC: ${imcValue.toStringAsFixed(2)} ($categoria) - ✅ Guardado";
+      resultado =
+          "IMC: ${imcValue.toStringAsFixed(2)} ($categoria) - ✅ Guardado";
       imc = imcValue;
     });
 
@@ -174,37 +181,43 @@ class _PantallaIMCState extends State<PantallaIMC> {
                       ),
                     ),
                   ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.save),
-                  label: const Text("Calcular y Guardar"),
-                  onPressed: _calcularYGuardar,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.save),
+                      label: const Text("Calcular y Guardar"),
+                      onPressed: _calcularYGuardar,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Mostrar el resultado calculado inmediatamente (si existe)
-              if (resultado.isNotEmpty)
-                Text(resultado, style: const TextStyle(fontSize: 18)),
-              const SizedBox(height: 10),
-              BlocBuilder<IMCCubit, IMCState>(builder: (context, state) {
-                if (state is IMCLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is IMCLoaded) {
-                  return Column(
-                    children: state.registros
-                        .map((r) => Text('IMC: ${r.imc} - ${r.categoria}'))
-                        .toList(),
-                  );
-                } else if (state is IMCError) {
-                  return Text('Error: ${state.mensaje}');
-                }
-                return const SizedBox.shrink();
-              }),
+                  const SizedBox(height: 20),
+                  // Mostrar el resultado calculado inmediatamente (si existe)
+                  if (resultado.isNotEmpty)
+                    Text(resultado, style: const TextStyle(fontSize: 18)),
+                  const SizedBox(height: 10),
+                  BlocBuilder<IMCCubit, IMCState>(
+                    builder: (context, state) {
+                      if (state is IMCLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is IMCLoaded) {
+                        return Column(
+                          children:
+                              state.registros
+                                  .map(
+                                    (r) =>
+                                        Text('IMC: ${r.imc} - ${r.categoria}'),
+                                  )
+                                  .toList(),
+                        );
+                      } else if (state is IMCError) {
+                        return Text('Error: ${state.mensaje}');
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                 ],
               ),
             ),

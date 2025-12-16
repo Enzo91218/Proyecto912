@@ -107,7 +107,7 @@ class DatabaseProvider {
       // SIEMPRE verificar y agregar columnas faltantes a registros_imc
       // (puede ser que la BD vieja no tenga las columnas nuevas)
       await _verificarYAgregarColumnasRegistrosIMC(db);
-      
+
       // SIEMPRE verificar y agregar la columna foto_perfil a usuarios
       await _verificarYAgregarColumnasUsuarios(db);
 
@@ -199,9 +199,7 @@ class DatabaseProvider {
       if (!columnNames.contains('foto_perfil')) {
         print('⚠ Columna foto_perfil no existe en usuarios, agregando...');
         try {
-          await db.execute(
-            'ALTER TABLE usuarios ADD COLUMN foto_perfil TEXT',
-          );
+          await db.execute('ALTER TABLE usuarios ADD COLUMN foto_perfil TEXT');
           print('✓ Columna foto_perfil agregada a usuarios');
         } catch (e) {
           print('⚠ Error agregando foto_perfil: $e');

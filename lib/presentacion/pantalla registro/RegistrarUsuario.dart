@@ -21,14 +21,14 @@ class _PantallaRegistrarUsuarioState extends State<PantallaRegistrarUsuario> {
   final edadCtrl = TextEditingController();
   final pesoCtrl = TextEditingController();
   final alturaCtrl = TextEditingController();
-  
+
   late FocusNode nombreFocus;
   late FocusNode emailFocus;
   late FocusNode passFocus;
   late FocusNode edadFocus;
   late FocusNode pesoFocus;
   late FocusNode alturaFocus;
-  
+
   @override
   void initState() {
     super.initState();
@@ -39,7 +39,7 @@ class _PantallaRegistrarUsuarioState extends State<PantallaRegistrarUsuario> {
     pesoFocus = FocusNode();
     alturaFocus = FocusNode();
   }
-  
+
   @override
   void dispose() {
     nombreCtrl.dispose();

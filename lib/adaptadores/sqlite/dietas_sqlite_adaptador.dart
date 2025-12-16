@@ -11,7 +11,9 @@ class RepositorioDeDietasSqlite implements RepositorioDeDietas {
   RepositorioDeDietasSqlite(this._provider, this._recetasRepositorio);
 
   @override
-  Future<List<Dieta>> dietasConIngredientes(List<Ingrediente> ingredientes) async {
+  Future<List<Dieta>> dietasConIngredientes(
+    List<Ingrediente> ingredientes,
+  ) async {
     final db = await _provider.database;
     final dietasData = await db.query('dietas');
 
@@ -23,7 +25,8 @@ class RepositorioDeDietasSqlite implements RepositorioDeDietas {
         where: 'dieta_id = ?',
         whereArgs: [dietaId],
       );
-      final recetasIds = recetasRelacionadas.map((r) => r['receta_id'] as String).toList();
+      final recetasIds =
+          recetasRelacionadas.map((r) => r['receta_id'] as String).toList();
       final recetas = <Ingrediente>[];
       for (final recetaId in recetasIds) {
         final recetaRow = await db.query(
@@ -33,17 +36,24 @@ class RepositorioDeDietasSqlite implements RepositorioDeDietas {
           limit: 1,
         );
         if (recetaRow.isNotEmpty) {
-          final receta =
-              await _recetasRepositorio.mapearReceta(recetaRow.first, db);
+          final receta = await _recetasRepositorio.mapearReceta(
+            recetaRow.first,
+            db,
+          );
           recetas.addAll(receta.ingredientes);
         }
       }
 
-      final ingredientesCoinciden = ingredientes.isEmpty
-          ? true
-          : ingredientes
-              .map((i) => i.nombre.toLowerCase())
-              .every((nombre) => recetas.map((ing) => ing.nombre.toLowerCase()).contains(nombre));
+      final ingredientesCoinciden =
+          ingredientes.isEmpty
+              ? true
+              : ingredientes
+                  .map((i) => i.nombre.toLowerCase())
+                  .every(
+                    (nombre) => recetas
+                        .map((ing) => ing.nombre.toLowerCase())
+                        .contains(nombre),
+                  );
 
       if (ingredientesCoinciden) {
         dietas.add(
@@ -73,7 +83,8 @@ class RepositorioDeDietasSqlite implements RepositorioDeDietas {
         where: 'dieta_id = ?',
         whereArgs: [dietaId],
       );
-      final recetasIds = recetasRelacionadas.map((r) => r['receta_id'] as String).toList();
+      final recetasIds =
+          recetasRelacionadas.map((r) => r['receta_id'] as String).toList();
       final recetas = <Ingrediente>[];
       for (final recetaId in recetasIds) {
         final recetaRow = await db.query(
@@ -83,7 +94,10 @@ class RepositorioDeDietasSqlite implements RepositorioDeDietas {
           limit: 1,
         );
         if (recetaRow.isNotEmpty) {
-          final receta = await _recetasRepositorio.mapearReceta(recetaRow.first, db);
+          final receta = await _recetasRepositorio.mapearReceta(
+            recetaRow.first,
+            db,
+          );
           recetas.addAll(receta.ingredientes);
         }
       }

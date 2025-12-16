@@ -39,8 +39,9 @@ class RecetasCubit extends Cubit<RecetasState> {
   final BuscarRecetas casoUso;
   final FiltrarRecetasPorCultura filtrarPorCultura;
   final BuscarRecetasConGemini buscarConGemini;
-  
-  RecetasCubit(this.casoUso, this.filtrarPorCultura, this.buscarConGemini) : super(RecetasInitial());
+
+  RecetasCubit(this.casoUso, this.filtrarPorCultura, this.buscarConGemini)
+    : super(RecetasInitial());
 
   Future<void> cargar() async {
     emit(RecetasLoading());
@@ -113,7 +114,7 @@ class RecetasCubit extends Cubit<RecetasState> {
     try {
       // Primero intenta búsqueda local
       final recetasLocales = await casoUso.call(ingredientes);
-      
+
       if (recetasLocales.isNotEmpty) {
         emit(RecetasLoaded(recetasLocales, fueDesdeBD: true));
         return;
@@ -122,15 +123,17 @@ class RecetasCubit extends Cubit<RecetasState> {
       // Si no hay resultados, usar Gemini
       print('\n🔍 No hay recetas locales, usando Gemini...');
       emit(RecetasLoading(usandoGemini: true));
-      
+
       final recetasGemini = await buscarConGemini.buscar(ingredientes);
-      
+
       if (recetasGemini.isNotEmpty) {
         emit(RecetasLoaded(recetasGemini, fueDesdeBD: false));
       } else {
-        emit(RecetasError(
-          'No se encontraron recetas para los ingredientes: ${ingredientes.map((i) => i.nombre).join(", ")}',
-        ));
+        emit(
+          RecetasError(
+            'No se encontraron recetas para los ingredientes: ${ingredientes.map((i) => i.nombre).join(", ")}',
+          ),
+        );
       }
     } catch (e) {
       emit(RecetasError('Error en búsqueda: $e'));

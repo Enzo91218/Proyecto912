@@ -1,11 +1,12 @@
-
 import '../dominio/entidades/dieta.dart';
 import '../dominio/entidades/ingrediente.dart';
 import '../dominio/repositorios/repositorio_de_dietas.dart';
 
 class RepositorioDeDietasA implements RepositorioDeDietas {
   @override
-  Future<List<Dieta>> dietasConIngredientes(List<Ingrediente> ingredientes) async {
+  Future<List<Dieta>> dietasConIngredientes(
+    List<Ingrediente> ingredientes,
+  ) async {
     // aca empiezan los ejemplos
     final todas = [
       Dieta(
@@ -17,8 +18,8 @@ class RepositorioDeDietasA implements RepositorioDeDietas {
           Ingrediente(id: '13', nombre: 'Huevos', cantidad: '3 unidades'),
           Ingrediente(id: '14', nombre: 'Queso', cantidad: '50g'),
         ],
-  ),
-  Dieta(
+      ),
+      Dieta(
         id: '2',
         nombre: 'Dieta Vegana',
         recetasIds: ['3'],
@@ -26,8 +27,8 @@ class RepositorioDeDietasA implements RepositorioDeDietas {
           Ingrediente(id: '15', nombre: 'Tofu', cantidad: '150g'),
           Ingrediente(id: '16', nombre: 'Lentejas', cantidad: '100g'),
         ],
-  ),
-  Dieta(
+      ),
+      Dieta(
         id: '3',
         nombre: 'Dieta Balanceada',
         recetasIds: ['1', '3'],

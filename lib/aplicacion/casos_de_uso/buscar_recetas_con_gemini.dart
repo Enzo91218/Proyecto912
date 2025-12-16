@@ -15,7 +15,9 @@ class BuscarRecetasConGemini {
 
     // 1. Intentar búsqueda local primero
     print('1️⃣ Intentando búsqueda local en BD...');
-    final recetasLocales = await _repositorio.recetasConIngredientes(ingredientes);
+    final recetasLocales = await _repositorio.recetasConIngredientes(
+      ingredientes,
+    );
 
     if (recetasLocales.isNotEmpty) {
       print('   ✅ Se encontraron ${recetasLocales.length} recetas en BD');
@@ -60,7 +62,10 @@ Proporciona exactamente 5 recetas con este formato.
         cultura: 'Internacional',
       );
 
-      final respuestaGemini = await _chatIA.obtenerRespuesta(prompt, recetaPlaceholder);
+      final respuestaGemini = await _chatIA.obtenerRespuesta(
+        prompt,
+        recetaPlaceholder,
+      );
 
       print('3️⃣ Parseando respuesta de Gemini...');
       final recetasGeneradas = _parsearRecetas(respuestaGemini, ingredientes);
@@ -93,12 +98,16 @@ Proporciona exactamente 5 recetas con este formato.
     }
   }
 
-  List<Receta> _parsearRecetas(String textoGemini, List<Ingrediente> ingredientesBase) {
+  List<Receta> _parsearRecetas(
+    String textoGemini,
+    List<Ingrediente> ingredientesBase,
+  ) {
     print('   Parseando texto de Gemini...');
     final recetas = <Receta>[];
 
     // Dividir por separadores "---"
-    final partes = textoGemini.split('---').where((s) => s.trim().isNotEmpty).toList();
+    final partes =
+        textoGemini.split('---').where((s) => s.trim().isNotEmpty).toList();
 
     for (final parte in partes) {
       try {
@@ -112,56 +121,68 @@ Proporciona exactamente 5 recetas con este formato.
           if (linea.contains('RECETA:')) {
             titulo = linea.replaceFirst(RegExp(r'RECETA:\s*'), '').trim();
           } else if (linea.contains('DESCRIPCIÓN:')) {
-            descripcion = linea.replaceFirst(RegExp(r'DESCRIPCIÓN:\s*'), '').trim();
+            descripcion =
+                linea.replaceFirst(RegExp(r'DESCRIPCIÓN:\s*'), '').trim();
           } else if (linea.contains('CULTURA:')) {
             cultura = linea.replaceFirst(RegExp(r'CULTURA:\s*'), '').trim();
           } else if (linea.contains('INGREDIENTES:')) {
-            ingredientesTexto = linea.replaceFirst(RegExp(r'INGREDIENTES:\s*'), '').trim();
+            ingredientesTexto =
+                linea.replaceFirst(RegExp(r'INGREDIENTES:\s*'), '').trim();
           }
         }
 
         if (titulo.isNotEmpty && descripcion.isNotEmpty) {
           // Parsear ingredientes con cantidades
           final ingredientes = <Ingrediente>[...ingredientesBase];
-          
+
           if (ingredientesTexto.isNotEmpty) {
-            final nuevosIngredientes = ingredientesTexto
-                .split(',')
-                .map((s) => s.trim())
-                .where((s) => s.isNotEmpty)
-                .where((ing) {
-                  // Extraer solo el nombre (lo que está antes del paréntesis)
-                  final nombre = ing.replaceAll(RegExp(r'\s*\([^)]*\).*'), '').trim();
-                  return !ingredientesBase.any((b) => b.nombre.toLowerCase() == nombre.toLowerCase());
-                })
-                .map((ing) {
-                  // Extraer nombre y cantidad
-                  final match = RegExp(r'([^(]+)\s*\(([^)]+)\)').firstMatch(ing);
-                  
-                  String nombre = ing;
-                  String cantidad = 'al gusto';
-                  
-                  if (match != null) {
-                    nombre = match.group(1)!.trim();
-                    cantidad = match.group(2)!.trim();
-                  } else {
-                    // Si no tiene paréntesis, usar todo como nombre
-                    nombre = ing.replaceAll(RegExp(r'\s*\([^)]*\).*'), '').trim();
-                  }
-                  
-                  return Ingrediente(
-                    id: nombre.toLowerCase().replaceAll(' ', '_'),
-                    nombre: nombre,
-                    cantidad: cantidad,
-                  );
-                })
-                .toList();
-            
+            final nuevosIngredientes =
+                ingredientesTexto
+                    .split(',')
+                    .map((s) => s.trim())
+                    .where((s) => s.isNotEmpty)
+                    .where((ing) {
+                      // Extraer solo el nombre (lo que está antes del paréntesis)
+                      final nombre =
+                          ing.replaceAll(RegExp(r'\s*\([^)]*\).*'), '').trim();
+                      return !ingredientesBase.any(
+                        (b) => b.nombre.toLowerCase() == nombre.toLowerCase(),
+                      );
+                    })
+                    .map((ing) {
+                      // Extraer nombre y cantidad
+                      final match = RegExp(
+                        r'([^(]+)\s*\(([^)]+)\)',
+                      ).firstMatch(ing);
+
+                      String nombre = ing;
+                      String cantidad = 'al gusto';
+
+                      if (match != null) {
+                        nombre = match.group(1)!.trim();
+                        cantidad = match.group(2)!.trim();
+                      } else {
+                        // Si no tiene paréntesis, usar todo como nombre
+                        nombre =
+                            ing
+                                .replaceAll(RegExp(r'\s*\([^)]*\).*'), '')
+                                .trim();
+                      }
+
+                      return Ingrediente(
+                        id: nombre.toLowerCase().replaceAll(' ', '_'),
+                        nombre: nombre,
+                        cantidad: cantidad,
+                      );
+                    })
+                    .toList();
+
             ingredientes.addAll(nuevosIngredientes);
           }
 
           final receta = Receta(
-            id: '${titulo.toLowerCase().replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}',
+            id:
+                '${titulo.toLowerCase().replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}',
             titulo: titulo,
             descripcion: descripcion,
             ingredientes: ingredientes,

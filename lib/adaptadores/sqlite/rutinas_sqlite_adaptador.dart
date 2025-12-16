@@ -151,18 +151,24 @@ class RepositorioDeRutinasSqlite implements RepositorioDeRutinas {
   }
 
   @override
-  Future<void> marcarDiaCompletado(String rutinaId, int dia, bool completada) async {
+  Future<void> marcarDiaCompletado(
+    String rutinaId,
+    int dia,
+    bool completada,
+  ) async {
     try {
       final db = await _provider.database;
-      print('📝 Marcando día $dia de rutina $rutinaId como completada: $completada');
-      
+      print(
+        '📝 Marcando día $dia de rutina $rutinaId como completada: $completada',
+      );
+
       await db.update(
         'rutina_alimenticia_alimentos',
         {'completada': completada ? 1 : 0},
         where: 'rutina_alimenticia_id = ? AND dia = ?',
         whereArgs: [int.tryParse(rutinaId) ?? 0, dia],
       );
-      
+
       _provider.recordDatabaseUpdate();
       print('✅ Día marcado correctamente');
     } catch (e) {

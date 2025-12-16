@@ -28,11 +28,13 @@ class _PantallaMenuState extends State<PantallaMenu> {
     _audioService = GetIt.instance.get<AudioService>();
     // Iniciar reproducción de música
     _audioService.play();
-    
+
     // Debug: mostrar si se inicializó correctamente
     Future.delayed(const Duration(milliseconds: 500), () {
       if (!_audioService.isInitialized) {
-        print('⚠️ Audio no se inicializó, verifica que el archivo esté en assets/audio/background_music.mp3');
+        print(
+          '⚠️ Audio no se inicializó, verifica que el archivo esté en assets/audio/background_music.mp3',
+        );
       }
     });
   }
@@ -270,7 +272,8 @@ class _PantallaMenuState extends State<PantallaMenu> {
                     return IconButton(
                       icon: Icon(
                         _audioService.isMuted
-                            ? Icons.volume_mute  // Icono con X cuando está silenciado
+                            ? Icons
+                                .volume_mute // Icono con X cuando está silenciado
                             : Icons.volume_up,
                         color: Colors.white,
                         size: 28,
@@ -279,7 +282,10 @@ class _PantallaMenuState extends State<PantallaMenu> {
                         _audioService.toggleMute();
                         setState(() {}); // Forzar reconstrucción
                       },
-                      tooltip: _audioService.isMuted ? 'Activar sonido' : 'Silenciar',
+                      tooltip:
+                          _audioService.isMuted
+                              ? 'Activar sonido'
+                              : 'Silenciar',
                     );
                   },
                 ),
@@ -377,28 +383,30 @@ class _PantallaMenuState extends State<PantallaMenu> {
                           builder: (context, state) {
                             if (state is PesoAlturaActualLoaded) {
                               // Si altura > 10, está en cm; si < 10, está en metros
-                              final alturaEnCm = state.datos.altura > 10
-                                  ? state.datos.altura
-                                  : state.datos.altura * 100;
+                              final alturaEnCm =
+                                  state.datos.altura > 10
+                                      ? state.datos.altura
+                                      : state.datos.altura * 100;
                               return _StatCard(
                                 icon: Icons.height,
                                 label: 'Altura',
-                                value:
-                                    '${alturaEnCm.toStringAsFixed(0)} cm',
+                                value: '${alturaEnCm.toStringAsFixed(0)} cm',
                                 color: Colors.green,
                               );
                             } else {
                               double alturaEnCm = 0;
                               if (usuario?.altura != null) {
                                 final altura = usuario!.altura;
-                                alturaEnCm = altura > 10 ? altura : altura * 100;
+                                alturaEnCm =
+                                    altura > 10 ? altura : altura * 100;
                               }
                               return _StatCard(
                                 icon: Icons.height,
                                 label: 'Altura',
-                                value: alturaEnCm > 0
-                                    ? '${alturaEnCm.toStringAsFixed(0)} cm'
-                                    : '-- cm',
+                                value:
+                                    alturaEnCm > 0
+                                        ? '${alturaEnCm.toStringAsFixed(0)} cm'
+                                        : '-- cm',
                                 color: Colors.green,
                               );
                             }
@@ -413,17 +421,7 @@ class _PantallaMenuState extends State<PantallaMenu> {
                         _StatCard(
                           icon: Icons.restaurant_menu,
                           label: 'Recetas Disponibles',
-                          value: BlocBuilder<RecetasCubit, RecetasState>(
-                            builder: (context, state) {
-                              if (state is RecetasLoaded) {
-                                return Text('${state.recetas.length}');
-                              } else if (state is RecetasLoading) {
-                                return const Text('...');
-                              } else {
-                                return const Text('0');
-                              }
-                            },
-                          ),
+                          value: '5',
                           color: Colors.purple,
                         ),
                       ],

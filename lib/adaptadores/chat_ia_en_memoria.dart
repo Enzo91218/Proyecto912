@@ -17,8 +17,7 @@ class ChatIAEnMemoria implements RepositorioChatIA {
     }
 
     if (preguntaLower.contains('ingrediente')) {
-      final ingredientes =
-          receta.ingredientes.map((i) => i.nombre).join(', ');
+      final ingredientes = receta.ingredientes.map((i) => i.nombre).join(', ');
       return 'Esta receta "${receta.titulo}" contiene los siguientes ingredientes: $ingredientes';
     }
 
@@ -27,12 +26,14 @@ class ChatIAEnMemoria implements RepositorioChatIA {
           'Generalmente, recetas de esta cultura toman entre 20-40 minutos.';
     }
 
-    if (preguntaLower.contains('diabetic') || preguntaLower.contains('azúcar')) {
+    if (preguntaLower.contains('diabetic') ||
+        preguntaLower.contains('azúcar')) {
       return 'Esta receta puede adaptarse para personas con diabetes. '
           'Recomendamos consultar con un nutricionista para asegurar que sea adecuada para tu dieta.';
     }
 
-    if (preguntaLower.contains('vegetarian') || preguntaLower.contains('vegan')) {
+    if (preguntaLower.contains('vegetarian') ||
+        preguntaLower.contains('vegan')) {
       return 'Esta receta "${receta.titulo}" puede adaptarse a una dieta vegetariana o vegana. '
           'Considera reemplazar ingredientes de origen animal con alternativas vegetales.';
     }
@@ -48,7 +49,8 @@ class ChatIAEnMemoria implements RepositorioChatIA {
           'Pregunta sobre ingredientes, tiempo de preparación, adaptaciones dietarias, o cualquier duda que tengas.';
     }
 
-    if (preguntaLower.contains('ayuda') || preguntaLower.contains('qué puedo')) {
+    if (preguntaLower.contains('ayuda') ||
+        preguntaLower.contains('qué puedo')) {
       return 'Puedo ayudarte con:\n'
           '• Información de ingredientes\n'
           '• Tiempo de preparación\n'
@@ -71,9 +73,7 @@ class ChatIAEnMemoria implements RepositorioChatIA {
 
   @override
   Future<List<MensajeChat>> obtenerHistorial(String recetaId) async {
-    return _mensajesEnMemoria
-        .where((m) => m.recetaId == recetaId)
-        .toList();
+    return _mensajesEnMemoria.where((m) => m.recetaId == recetaId).toList();
   }
 
   @override

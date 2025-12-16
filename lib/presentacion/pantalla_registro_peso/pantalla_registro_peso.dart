@@ -74,7 +74,9 @@ class _PantallaRegistroPesoState extends State<PantallaRegistroPeso> {
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       child: ListTile(
                         leading: const Icon(Icons.monitor_weight),
-                        title: Text('Peso: ${registro.peso.toStringAsFixed(2)} kg'),
+                        title: Text(
+                          'Peso: ${registro.peso.toStringAsFixed(2)} kg',
+                        ),
                         subtitle: Text(
                           'Altura: ${(registro.altura > 10 ? registro.altura : registro.altura * 100).toStringAsFixed(0)} cm\nFecha: $fechaFormato',
                         ),

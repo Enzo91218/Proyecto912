@@ -16,7 +16,7 @@ class PantallaLogin extends StatefulWidget {
 class _PantallaLoginState extends State<PantallaLogin> {
   late FocusNode emailFocus;
   late FocusNode passFocus;
-  
+
   @override
   void initState() {
     super.initState();
@@ -48,17 +48,12 @@ class _PantallaLoginState extends State<PantallaLogin> {
         children: [
           // Fondo con GIF animado
           SizedBox.expand(
-            child: Image.asset(
-              'assets/videos/login_bg.gif',
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('assets/videos/login_bg.gif', fit: BoxFit.cover),
           ),
-          
+
           // Overlay oscuro semi-transparente
-          Container(
-            color: Colors.black.withOpacity(0.5),
-          ),
-          
+          Container(color: Colors.black.withOpacity(0.5)),
+
           // Contenido del formulario
           Center(
             child: SingleChildScrollView(
@@ -156,22 +151,25 @@ class _PantallaLoginState extends State<PantallaLogin> {
                           context.go('/');
                         }
                         if (state is LoginFailure) {
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text(state.mensaje)));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(state.mensaje)),
+                          );
                         }
                       },
                       builder: (context, state) {
                         if (state is LoginLoading) {
                           return const CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           );
                         }
                         return SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () {
-                              if (emailCtrl.text.isEmpty || passCtrl.text.isEmpty) {
+                              if (emailCtrl.text.isEmpty ||
+                                  passCtrl.text.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Completa todos los campos'),
@@ -186,7 +184,10 @@ class _PantallaLoginState extends State<PantallaLogin> {
                             },
                             child: const Padding(
                               padding: EdgeInsets.all(15),
-                              child: Text('Ingresar', style: TextStyle(fontSize: 16)),
+                              child: Text(
+                                'Ingresar',
+                                style: TextStyle(fontSize: 16),
+                              ),
                             ),
                           ),
                         );

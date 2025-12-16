@@ -168,22 +168,18 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
         final receta = extra?['receta'];
-        final usuarioId = extra?['usuarioId'] ?? GetIt.instance.get<UsuarioActual>().id;
+        final usuarioId =
+            extra?['usuarioId'] ?? GetIt.instance.get<UsuarioActual>().id;
 
         if (receta == null) {
           return const Scaffold(
-            body: Center(
-              child: Text('Error: Receta no encontrada'),
-            ),
+            body: Center(child: Text('Error: Receta no encontrada')),
           );
         }
 
         return BlocProvider(
           create: (_) => inyector.getIt<ChatCubit>(),
-          child: ChatRecetaScreen(
-            receta: receta,
-            usuarioId: usuarioId,
-          ),
+          child: ChatRecetaScreen(receta: receta, usuarioId: usuarioId),
         );
       },
     ),

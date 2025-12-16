@@ -19,22 +19,22 @@ class AudioService extends ChangeNotifier {
   Future<void> _initializeAudio() async {
     try {
       print('DEBUG: Iniciando AudioService con audioplayers...');
-      
+
       // Cargar desde assets
       await _audioPlayer.setSource(AssetSource('audio/background_music.mp3'));
       print('✅ Audio cargado desde assets');
-      
+
       // Establecer volumen a 0.3 (30%)
       await _audioPlayer.setVolume(0.3);
       print('✅ Volumen establecido a 30%');
-      
+
       // Configurar para reproducir en bucle
       await _audioPlayer.setReleaseMode(ReleaseMode.loop);
       print('✅ Loop activado');
-      
+
       _isInitialized = true;
       notifyListeners();
-      
+
       print('✅ AudioService inicializado correctamente');
     } catch (e) {
       print('❌ Error inicializando AudioService: $e');
@@ -50,7 +50,7 @@ class AudioService extends ChangeNotifier {
         print('⚠️ AudioService no está inicializado');
         return;
       }
-      
+
       if (!_isPlaying) {
         await _audioPlayer.resume();
         _isPlaying = true;
@@ -78,7 +78,7 @@ class AudioService extends ChangeNotifier {
   Future<void> toggleMute() async {
     try {
       _isMuted = !_isMuted;
-      
+
       if (_isMuted) {
         await _audioPlayer.setVolume(0);
         print('🔇 Música silenciada');
